@@ -5,6 +5,19 @@ the top. Use absolute dates.
 
 ---
 
+## 2026-07-11 — Roadmap drafted
+
+Added [roadmap.md](roadmap.md) (linked from the index). Frames every future feature inside the
+**no-backend** constraint (only browser/iOS client state — IndexedDB, localStorage, Cache API, SW,
+Web Crypto; no server, no push delivery, no sync). Headline items: an **AI-response cache** (Dexie
+`aiCache` table, SHA-256 key over coarsened context + rig + locale + a variant counter, configurable
+TTL default 24h — wraps the provider call in the pipelines) to cut token spend, plus a themed
+backlog (cost control, coaching analytics, context planners, gear editor, data export, i18n, CI).
+Suggested next phase: cost & resilience (cache → token meter → offline queue/no-key fallback →
+export & free-up-space).
+
+---
+
 ## 2026-06-21 — Multilingual UI + LLM output (English / Danish)
 
 The app now speaks the user's language — both the chrome and the LLM content. See the

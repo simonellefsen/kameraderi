@@ -27,6 +27,8 @@ browser (IndexedDB via Dexie). The user brings their own LLM key (BYOK).
 
 - **architecture.md** — System topology, the task-generation loop, the evaluation loop, the LLM
   provider abstraction, and the data model, all as Mermaid diagrams. **Start here for the big picture.**
+- **roadmap.md** — Where the product goes next: the no-backend constraint, the AI-response cache,
+  and the themed feature backlog with a suggested sequencing.
 - **schema.md** — IndexedDB (Dexie) schema, the domain data models, and invariants.
 - **concepts/** — Core ideas and mental models (coaching loop, local-first PWA, gear capability
   model, the LLM-maintained wiki itself).

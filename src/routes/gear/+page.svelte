@@ -73,23 +73,27 @@
 	let showAdd = $state(false);
 	let aiBusy = $state(false);
 	let addError = $state<string | null>(null);
-	let form = $state({
-		make: '',
-		model: '',
-		isPrime: true,
-		flMin: 50,
-		flMax: 50,
-		aperture: 1.8,
-		hasOIS: false
-	});
+	function emptyLensForm() {
+		return {
+			make: activeBody?.make ?? '',
+			model: '',
+			isPrime: true,
+			flMin: 50,
+			flMax: 50,
+			aperture: 1.8,
+			hasOIS: false
+		};
+	}
+	let form = $state(emptyLensForm());
 
 	function openAdd() {
+		form = emptyLensForm();
 		addError = null;
 		showAdd = true;
 	}
 
 	function resetForm() {
-		form = { make: '', model: '', isPrime: true, flMin: 50, flMax: 50, aperture: 1.8, hasOIS: false };
+		form = emptyLensForm();
 		addError = null;
 	}
 

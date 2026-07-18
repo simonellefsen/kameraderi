@@ -9,7 +9,7 @@ import type { AiCacheEntry } from '$lib/db/schema';
 
 export type TokenUsage = { inputTokens?: number; outputTokens?: number };
 
-const STATS_KEY = 'iris-ai-cache-stats';
+const STATS_KEY = 'kameraderi-ai-cache-stats';
 
 interface CacheStats {
 	hits: number;

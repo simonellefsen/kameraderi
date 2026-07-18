@@ -1,14 +1,14 @@
-# Iris Wiki
+# Kameraderi Wiki
 
 **LLM-optimized project knowledge base.** This directory (and its subdirs) is the primary
-context source for agents working on Iris (the PhotoBuddy photography-coach PWA). Start here,
+context source for agents working on Kameraderi (the photography-coach PWA). Start here,
 then follow links.
 
 For full context, also read:
 - [../README.md](../README.md) — product/repo overview
 - [../AGENTS.md](../AGENTS.md) — conventions for humans + coding agents
 
-## What Iris is
+## What Kameraderi is
 
 A **photography coach that runs in the browser** (iOS Safari, Android Chrome, desktop). It reads
 your location, the time-of-day light, and the weather, then asks an LLM to design a photography
@@ -19,9 +19,10 @@ creativity) with a rubric score.
 It is a **pure client-side PWA** — SvelteKit + TypeScript, no backend. All data lives in the
 browser (IndexedDB via Dexie). The user brings their own LLM key (BYOK).
 
-> **Product name note:** the app ships as **Iris** (package, Dexie DB, and PWA manifest all say
-> `iris`). "PhotoBuddy" is the working title from the original design brief. Treat them as the
-> same project.
+> **Product name note:** the app ships as **Kameraderi** (package, Dexie DB, and PWA manifest all
+> say `kameraderi`) — a Danish (*kamera*) / French (*camaraderie*) pun. Earlier names for the same
+> project: "PhotoBuddy" (original design brief working title), then **Iris** (first shipped name,
+> repo `simonellefsen/iris`). See [log.md](log.md) for the rename history.
 
 ## Structure
 

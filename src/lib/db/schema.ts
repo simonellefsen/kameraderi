@@ -35,7 +35,7 @@ export interface AiCacheVariantRow {
 	updatedAt: number;
 }
 
-export class IrisDB extends Dexie {
+export class KameraderiDB extends Dexie {
 	settings!: Table<SettingsRecord, string>;
 	bodies!: Table<CameraBody, string>;
 	lenses!: Table<Lens, string>;
@@ -49,7 +49,7 @@ export class IrisDB extends Dexie {
 	aiCacheVariants!: Table<AiCacheVariantRow, string>;
 
 	constructor() {
-		super('iris');
+		super('kameraderi');
 		this.version(1).stores({
 			settings: '&id',
 			bodies: '&id, mount, isPhone',
@@ -68,11 +68,11 @@ export class IrisDB extends Dexie {
 	}
 }
 
-let instance: IrisDB | undefined;
+let instance: KameraderiDB | undefined;
 
 /** The Dexie instance is only available in the browser (it backs onto IndexedDB). */
-export function db(): IrisDB {
-	if (!browser) throw new Error('Iris DB is only available in the browser');
-	if (!instance) instance = new IrisDB();
+export function db(): KameraderiDB {
+	if (!browser) throw new Error('Kameraderi DB is only available in the browser');
+	if (!instance) instance = new KameraderiDB();
 	return instance;
 }

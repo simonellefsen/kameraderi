@@ -28,10 +28,10 @@ export const en = {
 
 	// ---- home ----
 	'home.hero':
-		"Your location-aware photography coach. Tell Iris what you're shooting with, and it'll set a task perfect for the light and weather right now — then critique your shot.",
+		"Your location-aware photography coach. Tell Kameraderi what you're shooting with, and it'll set a task perfect for the light and weather right now — then critique your shot.",
 	'home.noKeyNoteStart': 'First, add an LLM provider API key (e.g. OpenRouter) in',
 	'home.noKeyNoteEnd':
-		'. Iris calls the provider directly from your device — your key stays on this device.',
+		'. Kameraderi calls the provider directly from your device — your key stays on this device.',
 	'home.ready': 'Ready to shoot',
 	'home.noCamera': 'No camera selected',
 	'home.startSession': 'Start session →',
@@ -39,7 +39,7 @@ export const en = {
 	'home.howItWorks': 'How it works',
 	'home.step1Pre': 'Pick your camera and lens in',
 	'home.step1Post': '.',
-	'home.step2': 'Start a session — Iris reads your location, light, and weather.',
+	'home.step2': 'Start a session — Kameraderi reads your location, light, and weather.',
 	'home.step3': 'Shoot the task and upload the photo.',
 	'home.step4': 'Get a scored critique against the brief.',
 
@@ -95,7 +95,7 @@ export const en = {
 	// ---- setup ----
 	'setup.title': '⚙️ Setup',
 	'setup.byokNote':
-		'Bring your own key: Iris calls your LLM provider directly from the browser. Your API key is stored only on this device (IndexedDB) and is sent only to the provider you choose.',
+		'Bring your own key: Kameraderi calls your LLM provider directly from the browser. Your API key is stored only on this device (IndexedDB) and is sent only to the provider you choose.',
 	'setup.language': 'Language',
 	'setup.languageHint':
 		'Tasks and critiques are written in this language. Existing sessions keep their original language.',
@@ -234,10 +234,10 @@ const da: Record<MessageKey, string> = {
 
 	// ---- home ----
 	'home.hero':
-		'Din lokalitetsbevidste fotocoach. Fortæl Iris, hvad du skyder med, så finder den en opgave, der passer til lyset og vejret lige nu — og giver din billede kritik bagefter.',
+		'Din lokalitetsbevidste fotocoach. Fortæl Kameraderi, hvad du skyder med, så finder den en opgave, der passer til lyset og vejret lige nu — og giver din billede kritik bagefter.',
 	'home.noKeyNoteStart': 'Tilføj først en API-nøgle til en LLM-udbyder (f.eks. OpenRouter) under',
 	'home.noKeyNoteEnd':
-		'. Iris ringer til udbyderen direkte fra din enhed — din nøgle bliver på denne enhed.',
+		'. Kameraderi ringer til udbyderen direkte fra din enhed — din nøgle bliver på denne enhed.',
 	'home.ready': 'Klar til at skyde',
 	'home.noCamera': 'Intet kamera valgt',
 	'home.startSession': 'Start session →',
@@ -245,7 +245,7 @@ const da: Record<MessageKey, string> = {
 	'home.howItWorks': 'Sådan fungerer det',
 	'home.step1Pre': 'Vælg dit kamera og objektiv under',
 	'home.step1Post': '.',
-	'home.step2': 'Start en session — Iris aflæser din lokation, lyset og vejret.',
+	'home.step2': 'Start en session — Kameraderi aflæser din lokation, lyset og vejret.',
 	'home.step3': 'Skyd opgaven og upload billedet.',
 	'home.step4': 'Få en pointgivende kritik ud fra opgaven.',
 
@@ -301,7 +301,7 @@ const da: Record<MessageKey, string> = {
 	// ---- setup ----
 	'setup.title': '⚙️ Opsætning',
 	'setup.byokNote':
-		'Medbring din egen nøgle: Iris ringer til din LLM-udbyder direkte fra browseren. Din API-nøgle gemmes kun på denne enhed (IndexedDB) og sendes kun til den udbyder, du vælger.',
+		'Medbring din egen nøgle: Kameraderi ringer til din LLM-udbyder direkte fra browseren. Din API-nøgle gemmes kun på denne enhed (IndexedDB) og sendes kun til den udbyder, du vælger.',
 	'setup.language': 'Sprog',
 	'setup.languageHint':
 		'Opgaver og kritik skrives på dette sprog. Eksisterende sessioner beholder deres oprindelige sprog.',

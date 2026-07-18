@@ -12,7 +12,7 @@ export type SessionPhase =
 	| 'evaluating'
 	| 'done';
 
-const STORAGE_KEY = 'iris-active-session';
+const STORAGE_KEY = 'kameraderi-active-session';
 
 class SessionStore {
 	phase = $state<SessionPhase>('idle');

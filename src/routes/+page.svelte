@@ -19,7 +19,7 @@
 </script>
 
 <div class="card hero">
-	<h1>📷 Iris</h1>
+	<h1>📷 Kameraderi</h1>
 	<p class="muted">{t('home.hero')}</p>
 </div>
 

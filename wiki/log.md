@@ -1,9 +1,31 @@
 # Log
 
-Chronological living log of major progress, decisions, and learnings for Iris. Newest entries at
-the top. Use absolute dates.
+Chronological living log of major progress, decisions, and learnings for Kameraderi. Newest entries
+at the top. Use absolute dates.
 
 ---
+
+## 2026-07-18 — Renamed Iris → Kameraderi; repo moved
+
+Project renamed from **Iris** to **Kameraderi** (Danish *kamera* + French *camaraderie*), and the
+codebase moved from `/Users/lindau/codex/photobuddy` (GitHub `simonellefsen/iris`) to
+`/Users/lindau/codex/kameraderi` (GitHub `simonellefsen/kameraderi`), **preserving full git
+history** (`git pull` from the old local clone into the new empty repo, then renamed on top).
+
+Renamed throughout: `package.json` name, the Dexie database (`iris` → `kameraderi`, class
+`IrisDB` → `KameraderiDB`), the PWA manifest name/short_name and `apple-mobile-web-app-title`,
+localStorage keys (`iris-active-session` → `kameraderi-active-session`,
+`iris-ai-cache-stats` → `kameraderi-ai-cache-stats`), the LLM system-prompt persona name ("You are
+Kameraderi, …" in both `taskSystem.ts`/`evalSystem.ts`), the OpenRouter attribution headers
+(`X-Title`, referer fallback), all UI copy (`i18n/messages.ts`, en **and** da), and every wiki/doc
+page describing current behaviour. **Not rewritten:** older dated log entries and decision docs
+that quote what was literally true at the time (they still say "Iris" where that's what shipped
+then) — only living/reference docs were updated to the new name.
+
+Old local clone at `/Users/lindau/codex/photobuddy` and the `simonellefsen/iris` GitHub repo were
+left untouched (no destructive action taken); the user can archive/delete those separately if
+wanted. The Vercel project deployed from the old repo also still needs to be repointed (or a new
+one created) at `simonellefsen/kameraderi` — that's a manual step outside this session's reach.
 
 ## 2026-07-11 — AI response cache shipped (Roadmap Requirement 1)
 

@@ -1,6 +1,6 @@
 # Architecture
 
-System architecture of Iris: a pure client-side PWA with **no backend**. The browser talks
+System architecture of Kameraderi: a pure client-side PWA with **no backend**. The browser talks
 directly to public context APIs (weather, geocode) and to the user's chosen LLM provider with a
 BYOK key. All state lives in IndexedDB. All diagrams are Mermaid (render on GitHub).
 
@@ -17,7 +17,7 @@ flowchart TB
   subgraph device["User's device (browser / installed PWA)"]
     ui["SvelteKit SPA\nroutes: / · /gear · /session · /history · /settings"]
     sw["Service worker (Workbox)\nprecache shell + runtime-cache APIs"]
-    idb[("IndexedDB (Dexie 'iris')\nsettings · gear · tasks · submissions ·\nevaluations · sessions · photos(Blob)")]
+    idb[("IndexedDB (Dexie 'kameraderi')\nsettings · gear · tasks · submissions ·\nevaluations · sessions · photos(Blob)")]
     ui <--> idb
     sw -. caches .- ui
   end

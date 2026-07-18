@@ -1,15 +1,16 @@
-# Iris
+# Kameraderi
 
-A **photography coach in your browser**. Iris reads your location, the time-of-day light, and the
-weather, then uses an LLM to design a photography **task** tailored to your gear and the current
-conditions. You shoot, submit the photo, and a **vision LLM** grades it against the brief
+A **photography coach in your browser**. Kameraderi reads your location, the time-of-day light, and
+the weather, then uses an LLM to design a photography **task** tailored to your gear and the
+current conditions. You shoot, submit the photo, and a **vision LLM** grades it against the brief
 (composition, exposure, constraint adherence, creativity) with a rubric score.
 
 It's a **pure client-side PWA** — SvelteKit + TypeScript, no backend. All data lives on your device
 (IndexedDB), it works offline, and it's installable. You bring your own LLM key (BYOK).
 
-> The repo/app ships as **Iris**; "PhotoBuddy" was the working title in the design brief — same
-> project.
+> **Naming history:** "PhotoBuddy" was the working title in the original design brief; the project
+> then shipped under the name **Iris**; it's now **Kameraderi** (Danish *kamera* + French
+> *camaraderie* — a pun on having a camera companion) — same project throughout.
 
 ## How it works
 
@@ -27,19 +28,19 @@ flowchart LR
    aperture, shutter floor, ISO cap). A feasibility guard clamps every constraint to your gear so
    you never get "shoot at f/1.8" on an f/4.5 kit zoom.
 3. **Shoot** — take the photo on your real camera (get it to your camera roll via the camera's own
-   app) or capture in-app on a phone. Iris reads the EXIF to know what gear/settings you used.
+   app) or capture in-app on a phone. Kameraderi reads the EXIF to know what gear/settings you used.
 4. **Evaluate** — a vision LLM grades the photo on a fixed rubric with rationale, strengths, and
    improvements.
 5. **Learn** — scores and feedback land in history so you can see progress.
 
 > **Why upload, not USB?** Browsers can't read a camera over USB (WebUSB blocks the camera
 > PTP/MTP device classes). So the flow is: camera → its own app → phone camera roll → pick the file
-> in Iris → parse EXIF. See
+> in Kameraderi → parse EXIF. See
 > [wiki/decisions/2026-06-20-camera-ingest-via-exif.md](wiki/decisions/2026-06-20-camera-ingest-via-exif.md).
 
 ## Bring your own LLM key (BYOK)
 
-Iris talks **directly from your browser** to the provider you choose, with your own key (stored in
+Kameraderi talks **directly from your browser** to the provider you choose, with your own key (stored in
 IndexedDB, on-device only). One abstraction covers five providers:
 
 | Provider | Adapter | Vision |

@@ -21,8 +21,8 @@ export default defineConfig({
 			strategies: 'generateSW',
 			registerType: 'autoUpdate',
 			manifest: {
-				name: 'Iris',
-				short_name: 'Iris',
+				name: 'Kameraderi',
+				short_name: 'Kameraderi',
 				description: 'A location-aware photography coach that designs tasks and critiques your shots.',
 				theme_color: '#0f172a',
 				background_color: '#0f172a',

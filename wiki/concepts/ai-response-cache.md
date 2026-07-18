@@ -1,6 +1,6 @@
 # Concept: the AI response cache
 
-Every LLM call costs the user tokens (BYOK — it's their bill, not ours). Iris caches **task**
+Every LLM call costs the user tokens (BYOK — it's their bill, not ours). Kameraderi caches **task**
 generation and **gear-spec augmentation** responses so a repeated request doesn't repeat the spend.
 
 Implements [roadmap.md](../roadmap.md) Requirement 1. Design decision:

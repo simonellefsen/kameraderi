@@ -1,6 +1,6 @@
 # Concept: the photography coaching loop
 
-Iris is a **coach**, not a gallery or a filter app. The whole product is one loop:
+Kameraderi is a **coach**, not a gallery or a filter app. The whole product is one loop:
 
 ```
 context  →  task  →  shoot  →  evaluate  →  learn

@@ -1,6 +1,7 @@
-# AGENTS.md — Iris
+# AGENTS.md — Kameraderi
 
-Guidelines for humans and AI agents working on Iris (the PhotoBuddy photography-coach PWA).
+Guidelines for humans and AI agents working on Kameraderi (photography-coach PWA; formerly "Iris" /
+"PhotoBuddy").
 
 ## Read first
 
@@ -34,7 +35,7 @@ Guidelines for humans and AI agents working on Iris (the PhotoBuddy photography-
 
 ```
 types/        domain + provider types (gear, task, submission, evaluation, session, settings)
-db/           Dexie schema (IrisDB 'iris') + Blob photo helpers + live (runes) queries
+db/           Dexie schema (KameraderiDB 'kameraderi') + Blob photo helpers + live (runes) queries
 stores/       Svelte 5 $state wrappers over Dexie (settings, session)
 llm/          provider.ts (interface) · registry.ts (factory) · providers.ts (metadata)
               openaiCompatible.ts (openrouter/openai/grok) · anthropic.ts · gemini.ts

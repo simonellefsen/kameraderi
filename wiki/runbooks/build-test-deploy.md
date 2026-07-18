@@ -58,7 +58,7 @@ pnpm build          # vite build via @sveltejs/adapter-vercel (SPA: ssr=false fa
 pnpm preview        # serve the build; service worker is ACTIVE here
 ```
 
-In `preview`, verify: the app installs (manifest `Iris`, standalone), the shell loads offline, and
+In `preview`, verify: the app installs (manifest `Kameraderi`, standalone), the shell loads offline, and
 Open-Meteo/BigDataCloud responses are runtime-cached. On iOS, confirm the "Add to Home Screen" hint
 and that the installed PWA has its own storage (separate from Safari).
 

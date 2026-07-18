@@ -1,12 +1,12 @@
 # Data Schema
 
 **Engine**: IndexedDB via [Dexie](https://dexie.org/) v4
-**Database name**: `iris`
+**Database name**: `kameraderi`
 **Access**: typed `Table<T>` + `liveQuery` (reactive Svelte 5 runes wrap it in `stores/`)
 **Conventions**: stable string ids (`uid('task')` etc., see [utils/id.ts](../src/lib/utils/id.ts)),
 `createdAt` epoch-millis timestamps, plain JSON values (sync-friendly even though there is no sync).
 
-Source of truth: [src/lib/db/schema.ts](../src/lib/db/schema.ts) (the `IrisDB` class) and
+Source of truth: [src/lib/db/schema.ts](../src/lib/db/schema.ts) (the `KameraderiDB` class) and
 [src/lib/types/](../src/lib/types/) (the domain types). **This document is the contract** — keep
 the Dexie store definition, the TS types, and this page in sync.
 
@@ -97,7 +97,7 @@ Ties `rig + context + task + submission + evaluation` together for the history v
 ## Client-side persistence (localStorage)
 
 Two small things live in `localStorage`, separate from the IndexedDB tables above:
-- `iris-active-session` — the in-progress coaching session (task + context + submission +
+- `kameraderi-active-session` — the in-progress coaching session (task + context + submission +
   evaluation, no blobs) so a reload/app-reopen resumes the brief instead of losing it. Written via
   `$state.snapshot` (proxies can't be cloned). Managed by the session store
   ([stores/session.svelte.ts](../src/lib/stores/session.svelte.ts)); cleared on `reset()`.

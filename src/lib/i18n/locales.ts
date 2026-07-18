@@ -1,4 +1,4 @@
-// Locale model for Iris. A *locale* (en-US / en-GB / da) drives three things:
+// Locale model for Kameraderi. A *locale* (en-US / en-GB / da) drives three things:
 //   1. which UI dictionary is used (the `ui` key — en-US and en-GB share 'en'),
 //   2. Intl date/number formatting (the `bcp47` tag),
 //   3. the output language we instruct the LLM to write in (`languageName`).

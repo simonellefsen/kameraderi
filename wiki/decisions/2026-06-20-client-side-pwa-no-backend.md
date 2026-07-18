@@ -5,7 +5,7 @@
 
 ## Context
 
-Iris must run in mobile browsers (iOS Safari, Android Chrome) and on desktop, and use the user's
+Kameraderi must run in mobile browsers (iOS Safari, Android Chrome) and on desktop, and use the user's
 own LLM key. The product is a personal coach over personal photos — privacy-sensitive, and with no
 inherent need for shared server state.
 
@@ -17,7 +17,7 @@ Build a **pure client-side PWA** with **no backend**:
 - Static build via `@sveltejs/adapter-vercel` (pinned `nodejs22.x` runtime), `ssr=false`,
   `prerender=false` → a fallback `index.html` SPA. (The original brief named `adapter-static`; the
   Vercel adapter in SPA mode produces the equivalent static output and is what the repo uses.)
-- All persistent data in **IndexedDB via Dexie** (DB name `iris`).
+- All persistent data in **IndexedDB via Dexie** (DB name `kameraderi`).
 - `@vite-pwa/sveltekit` (Workbox) for the manifest + service worker (precache shell, runtime-cache
   weather/geocode).
 - Local-first, offline-capable, BYOK.

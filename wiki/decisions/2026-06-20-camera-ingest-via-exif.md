@@ -19,7 +19,7 @@ Realize "camera → app" as:
 
 ```
 camera → its own app (e.g. Canon Camera Connect over Wi-Fi/BT) → phone camera roll
-       → user picks the file in Iris → we parse EXIF
+       → user picks the file in Kameraderi → we parse EXIF
 ```
 
 - **Ingest** = camera-roll / Files **upload** + **EXIF parse**; phone mode also offers in-app

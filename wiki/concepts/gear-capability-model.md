@@ -2,7 +2,7 @@
 
 The single biggest way a photography coach loses trust is by handing out a brief the user's gear
 **physically cannot do** — "shoot this at f/1.8" on an f/4.5–6.3 kit zoom, or "use 200mm" on a 50mm
-prime. Iris prevents this in code, not by hoping the LLM behaves.
+prime. Kameraderi prevents this in code, not by hoping the LLM behaves.
 
 ## The pieces
 

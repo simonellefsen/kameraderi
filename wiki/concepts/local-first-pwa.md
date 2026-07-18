@@ -1,6 +1,6 @@
 # Concept: local-first PWA
 
-Iris is **local-first** and **backend-less**. Everything the user owns — settings, gear, tasks,
+Kameraderi is **local-first** and **backend-less**. Everything the user owns — settings, gear, tasks,
 photos, evaluations, history — lives on their device in IndexedDB. The only network calls are to
 public context APIs and to the LLM provider the user configured with their own key.
 
@@ -28,7 +28,7 @@ public context APIs and to the LLM provider the user configured with their own k
 ## PWA mechanics
 
 - `@vite-pwa/sveltekit` (Workbox, `generateSW`, `autoUpdate`) produces the manifest + service
-  worker. Manifest: name `Iris`, `display: standalone`, scope `/`. See [vite.config.ts](../../vite.config.ts).
+  worker. Manifest: name `Kameraderi`, `display: standalone`, scope `/`. See [vite.config.ts](../../vite.config.ts).
 - Runtime caching: Open-Meteo `NetworkFirst` (30 min), BigDataCloud `StaleWhileRevalidate` (30 days).
 - The SW is disabled in `pnpm dev` (`devOptions.enabled: false`) to keep dev fast; verify the full
   offline/installable behaviour in `build`/`preview`.

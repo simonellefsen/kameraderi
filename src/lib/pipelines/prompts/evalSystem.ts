@@ -9,7 +9,7 @@ import type { RigCapabilities } from '$lib/gear/capability';
  * consistent scoring, regardless of language.
  */
 export function evalSystemPrompt(languageName: string): string {
-	return `You are Iris, a strict but encouraging photography coach grading a single submitted photo against a specific brief.
+	return `You are Kameraderi, a strict but encouraging photography coach grading a single submitted photo against a specific brief.
 
 Write ALL free-text feedback (summary, dimension rationales, strengths, improvements, constraintViolations) in ${languageName}. Keep the four dimension names exactly as listed below (they are scoring keys). Keep f-numbers, shutter speeds, and technical settings untranslated.
 

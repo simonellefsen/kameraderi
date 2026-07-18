@@ -1,6 +1,6 @@
 # Roadmap
 
-Where Iris goes next. This is a living plan — reorder freely, and promote anything with real design
+Where Kameraderi goes next. This is a living plan — reorder freely, and promote anything with real design
 weight into a dated [decision](decisions/README.md). Cross-refs: [index.md](index.md) ·
 [architecture.md](architecture.md) · [log.md](log.md).
 

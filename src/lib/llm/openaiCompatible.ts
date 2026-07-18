@@ -28,8 +28,8 @@ export class OpenAICompatibleProvider implements LLMProvider {
 		};
 		// OpenRouter recommends attribution headers; harmless elsewhere but only set for it.
 		if (this.meta.key === 'openrouter') {
-			h['HTTP-Referer'] = typeof location !== 'undefined' ? location.origin : 'https://iris.app';
-			h['X-Title'] = 'Iris';
+			h['HTTP-Referer'] = typeof location !== 'undefined' ? location.origin : 'https://kameraderi.app';
+			h['X-Title'] = 'Kameraderi';
 		}
 		return h;
 	}

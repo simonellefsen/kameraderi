@@ -81,7 +81,10 @@ In short:
 Grouped by area; roughly ordered by value-to-effort within each. Nothing here needs a server.
 
 ### A. Token & cost control (pairs with the cache)
-- **Cost/token meter** — per session + rolling monthly total (local), with an optional budget warning.
+- ~~**Cost/token meter** — local daily + rolling monthly total, with an optional budget warning.~~
+  Done 2026-07-18: real provider calls (including schema-validation retries) are recorded locally;
+  Settings surfaces today's and rolling 30-day totals plus the optional soft limit. Cache hits are
+  excluded because they make no call.
 - **Per-task model routing** — cheap text model for task generation, strong vision model only for
   eval (already two model slots; surface presets like "Economy / Balanced / Best").
 - **Provider prompt-caching** — use Anthropic/OpenAI prompt-cache headers for the static system
@@ -89,10 +92,12 @@ Grouped by area; roughly ordered by value-to-effort within each. Nothing here ne
 - **Local pre-checks before eval** — compute exposure histogram, rough sharpness, and rule-of-thirds
   saliency on-device; block/flag an obviously-off shot (or grade "technical" locally) *before*
   spending a vision call.
-- **Offline queue** — if submitting offline, persist the pending eval and run it automatically on
-  reconnect.
-- **No-key / offline fallback tasks** — a bundled library of template briefs filled from local
-  context (light + weather + rig) so the core loop works with zero LLM.
+- ~~**Offline queue** — if submitting offline, persist the pending eval and run it automatically on
+  reconnect.~~ Done 2026-07-18: foreground-only resume runs on app launch / `online`, as required
+  by browser and iOS background-work limits. See [offline-evaluation-queue.md](concepts/offline-evaluation-queue.md).
+- ~~**No-key / offline fallback tasks** — a bundled library of template briefs filled from local
+  context (light + weather + rig) so the core loop works with zero LLM.~~ Done 2026-07-18; see
+  [local-fallback-tasks.md](concepts/local-fallback-tasks.md).
 
 ### B. Coaching depth & learning
 - **Progress analytics** — score trends over time per rubric dimension (is composition improving?),
@@ -116,8 +121,10 @@ Grouped by area; roughly ordered by value-to-effort within each. Nothing here ne
 - **Seasonal / event themes** — holidays, first snow, local events (from keyless sources).
 
 ### D. Gear
-- **Full gear editor** — add/edit/delete **camera bodies** too (today only lenses are editable);
-  directly answers "my phone is the wrong model" without waiting for an EXIF capture.
+- **Full gear editor** — add/edit/delete **camera bodies** too (today only lenses are editable).
+- ~~**Specific iPhone model selection** — select the actual phone and its real rear camera instead
+  of inferring device hardware from the browser/EXIF.~~ Done 2026-07-18; see
+  [the decision](decisions/2026-07-18-iphone-model-selection.md).
 - **Auto-add gear from EXIF** — offer to save the exact body/lens detected in an uploaded shot.
 - **Accessories** — tripod, ND, polarizer, flash as toggles that unlock task types (long-exposure
   needs tripod/ND; the feasibility guard already reasons about shutter).

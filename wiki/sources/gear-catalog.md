@@ -11,12 +11,13 @@ The curated gear data that seeds the capability engine. Canonical data:
   `source`.
 - **lenses** — see `Lens`: make/model, mount, `isPrime`, `focalLengthMm` (prime number or
   `{min,max}`), `maxAperture: {focalLength, maxAperture}[]` (variable-aperture aware), `hasOIS`,
-  `source`.
+  optional `compatibleBodyIds`, `source`.
 
 ## Phase-1 seed
 
-Phase 1 hardcodes a minimal catalog — **Canon EOS R8** body + **RF 50mm f/1.8** lens — enough to
-prove the end-to-end loop on a real rig.
+The catalog includes a small Canon seed plus a curated iPhone 15–17 camera catalog. See
+[iphone-camera-catalog.md](iphone-camera-catalog.md) for its Apple-primary-source evidence and the
+reason each phone camera is modeled as a separate compatible lens.
 
 ## Augmentation & provenance
 

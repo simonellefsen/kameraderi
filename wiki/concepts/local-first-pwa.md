@@ -33,6 +33,12 @@ public context APIs and to the LLM provider the user configured with their own k
 - The SW is disabled in `pnpm dev` (`devOptions.enabled: false`) to keep dev fast; verify the full
   offline/installable behaviour in `build`/`preview`.
 - iOS: needs `apple-mobile-web-app-capable` meta + an "Add to Home Screen" hint (no JS install API
-  on iOS). An installed iOS PWA has its **own storage partition** separate from Safari.
+  on iOS). Kameraderi presents this as a dismissible, localized modal: on iOS it explains the
+  Share → Add to Home Screen flow, while browsers that expose `beforeinstallprompt` get their native
+  install control. An installed iOS PWA has its **own storage partition** separate from Safari.
+- Android: supports installed PWAs too. Kameraderi uses the native browser install control when
+  `beforeinstallprompt` is available (Chrome/Samsung Internet/other Chromium-based browsers) and
+  otherwise explains the browser-menu **Install app** / **Add to Home screen** route. It never
+  claims a particular Android browser's wording or packaging behavior.
 
 See [decisions/2026-06-20-client-side-pwa-no-backend.md](../decisions/2026-06-20-client-side-pwa-no-backend.md).

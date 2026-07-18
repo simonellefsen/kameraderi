@@ -15,22 +15,6 @@
 			"maxIso": 51200,
 			"isPhone": false,
 			"source": "catalog"
-		},
-		{
-			"id": "body_iphone_15_pro",
-			"make": "Apple",
-			"model": "iPhone",
-			"mount": "phone-fixed",
-			"sensor": "phone",
-			"sensorSizeMm": { "w": 9.8, "h": 7.3 },
-			"cropFactor": 1.0,
-			"megapixels": 12,
-			"hasIBIS": true,
-			"maxShutter": "1/10000",
-			"minIso": 50,
-			"maxIso": 6400,
-			"isPhone": true,
-			"source": "catalog"
 		}
 	],
 	"lenses": [
@@ -59,17 +43,6 @@
 			],
 			"hasOIS": true,
 			"filterThreadMm": 58,
-			"source": "catalog"
-		},
-		{
-			"id": "lens_iphone_15_pro_main",
-			"make": "Apple",
-			"model": "iPhone main (35mm-equiv)",
-			"mount": "phone-fixed",
-			"isPrime": true,
-			"focalLengthMm": { "min": 24, "max": 24 },
-			"maxAperture": [{ "focalLength": 24, "maxAperture": 1.78 }],
-			"hasOIS": true,
 			"source": "catalog"
 		}
 	]

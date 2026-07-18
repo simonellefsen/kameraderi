@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { settings } from '$lib/stores/settings.svelte';
 	import { allBodies, allLenses } from '$lib/gear/catalog';
+	import { lensIsCompatibleWithBody } from '$lib/gear/capability';
 	import { augmentLens } from '$lib/gear/augment';
 	import { db } from '$lib/db/schema';
 	import { useLiveQuery } from '$lib/db/live.svelte';
@@ -15,9 +16,18 @@
 
 	const activeRig = $derived(settings.current.activeRig);
 	const activeBody = $derived(bodies.value?.find((b) => b.id === activeRig?.bodyId));
+	const iPhoneBodies = $derived(
+		(bodies.value ?? [])
+			.filter((body) => body.isPhone && body.make === 'Apple' && body.source === 'catalog')
+			.sort((a, b) => a.model.localeCompare(b.model))
+	);
+	const activePhoneIsCatalog = $derived(iPhoneBodies.some((body) => body.id === activeBody?.id));
+	const cameraBodies = $derived((bodies.value ?? []).filter((body) => !body.isPhone));
 	const compatibleLenses = $derived(
 		activeBody
-			? (lenses.value ?? []).filter((l) => compatibleMounts(activeBody.mount).includes(l.mount))
+			? (lenses.value ?? []).filter(
+					(l) => compatibleMounts(activeBody.mount).includes(l.mount) && lensIsCompatibleWithBody(l, activeBody)
+				)
 			: []
 	);
 	const activeLensObj = $derived(
@@ -51,6 +61,12 @@
 	async function selectLens(lens: Lens) {
 		if (!activeRig) return;
 		await settings.save({ ...settings.current, activeRig: { ...activeRig, lensId: lens.id } });
+	}
+
+	async function selectIPhoneModel(event: Event) {
+		const id = (event.currentTarget as HTMLSelectElement).value;
+		const body = iPhoneBodies.find((candidate) => candidate.id === id);
+		if (body) await selectBody(body);
 	}
 
 	// ---- Add / remove lenses ----
@@ -163,7 +179,22 @@
 {#if bodies.loading}
 	<p class="muted">{t('common.loading')}</p>
 {:else}
-	{#each bodies.value ?? [] as body (body.id)}
+	{#if iPhoneBodies.length}
+		<div class="card">
+			<label for="iphone-model">{t('gear.iphoneModel')}</label>
+			<select id="iphone-model" value={activeBody?.isPhone ? activeBody.id : ''} onchange={selectIPhoneModel}>
+				<option value="" disabled>{t('gear.iphoneModelPlaceholder')}</option>
+				{#if activeBody?.isPhone && !activePhoneIsCatalog}
+					<option value={activeBody.id}>{activeBody.model} ({t('gear.sourceYours')})</option>
+				{/if}
+				{#each iPhoneBodies as body (body.id)}
+					<option value={body.id}>{body.model}</option>
+				{/each}
+			</select>
+			<p class="muted" style="font-size: 0.82rem;">{t('gear.iphoneModelHint')}</p>
+		</div>
+	{/if}
+	{#each cameraBodies as body (body.id)}
 		<button
 			class="btn btn-block"
 			style="justify-content: flex-start; margin-bottom: 8px; text-align: left; {body.id ===
@@ -184,7 +215,7 @@
 
 {#if activeBody}
 	<h3>
-		{t('gear.lensesMount', { mount: activeBody.mount.toUpperCase() })}
+		{activeBody.isPhone ? t('gear.iphoneCameras') : t('gear.lensesMount', { mount: activeBody.mount.toUpperCase() })}
 		{#if compatibleLenses.length === 0}<span class="muted">{t('gear.noneYet')}</span>{/if}
 	</h3>
 

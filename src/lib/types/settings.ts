@@ -22,4 +22,6 @@ export interface Settings {
 	locale: LocaleId; // UI + LLM output language (new sessions/tasks use this)
 	aiCacheEnabled: boolean; // cache task/gear-spec LLM responses to save tokens
 	aiCacheTtlHours: number; // task-generation cache lifetime (gear specs cache longer, fixed)
+	monthlyTokenBudget: number | null; // optional soft warning threshold for the rolling 30-day usage meter
+	installPromptDismissed: boolean; // don't show the install-to-home-screen prompt again on this device
 }

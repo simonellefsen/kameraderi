@@ -14,6 +14,11 @@ export interface RigCapabilities {
 	maxApertureAt(fl: number): number | undefined;
 }
 
+/** A curated fixed camera is valid only for the phone body it belongs to. */
+export function lensIsCompatibleWithBody(lens: Lens, body: CameraBody): boolean {
+	return !lens.compatibleBodyIds || lens.compatibleBodyIds.includes(body.id);
+}
+
 export function rigCapabilities(body: CameraBody, lens?: Lens): RigCapabilities {
 	const fl = lens?.focalLengthMm ?? { min: 24, max: 24 };
 	const steps = lens?.maxAperture ?? [];
@@ -94,5 +99,8 @@ export async function resolveRig(
 	const body = await getBody(rig.bodyId);
 	if (!body) throw new Error(`Unknown camera body: ${rig.bodyId}`);
 	const lens = rig.lensId ? await getLens(rig.lensId) : undefined;
+	if (lens && !lensIsCompatibleWithBody(lens, body)) {
+		throw new Error(`${lens.model} is not compatible with ${body.make} ${body.model}`);
+	}
 	return { body, lens };
 }

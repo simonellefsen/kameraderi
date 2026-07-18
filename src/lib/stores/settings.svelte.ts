@@ -14,6 +14,8 @@ export function defaultSettings(): Settings {
 		locale: DEFAULT_LOCALE,
 		aiCacheEnabled: true,
 		aiCacheTtlHours: 24,
+		monthlyTokenBudget: null,
+		installPromptDismissed: false,
 		providers: Object.fromEntries(
 			PROVIDER_LIST.map((p) => [
 				p.key,

@@ -10,6 +10,7 @@ export type SessionPhase =
 	| 'task'
 	| 'submitting'
 	| 'evaluating'
+	| 'queued'
 	| 'done';
 
 const STORAGE_KEY = 'kameraderi-active-session';
@@ -29,7 +30,8 @@ class SessionStore {
 		return (
 			this.phase === 'gathering' ||
 			this.phase === 'submitting' ||
-			this.phase === 'evaluating'
+			this.phase === 'evaluating' ||
+			this.phase === 'queued'
 		);
 	}
 
@@ -57,7 +59,7 @@ class SessionStore {
 				return;
 			}
 			const snapshot = {
-				phase: this.phase === 'done' ? 'done' : 'task',
+				phase: this.phase === 'done' ? 'done' : this.phase === 'queued' ? 'queued' : 'task',
 				context: $state.snapshot(this.context),
 				task: $state.snapshot(this.task),
 				submission: $state.snapshot(this.submission),
@@ -78,7 +80,7 @@ class SessionStore {
 			if (!raw) return;
 			const d = JSON.parse(raw);
 			if (!d?.task) return;
-			this.phase = d.phase === 'done' ? 'done' : 'task';
+			this.phase = d.phase === 'done' ? 'done' : d.phase === 'queued' ? 'queued' : 'task';
 			this.context = d.context ?? null;
 			this.task = d.task ?? null;
 			this.submission = d.submission ?? null;

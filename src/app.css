@@ -355,6 +355,72 @@ a.dest-link {
 	line-height: 1;
 }
 
+.modal-backdrop {
+	position: fixed;
+	inset: 0;
+	z-index: 100;
+	display: grid;
+	place-items: end center;
+	padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+	background: rgba(2, 6, 23, 0.66);
+	backdrop-filter: blur(4px);
+}
+
+.install-modal {
+	width: min(100%, 460px);
+	margin: 0;
+	background: var(--surface);
+	border: 1px solid var(--surface-3);
+	border-radius: var(--radius);
+	padding: 20px;
+	box-shadow: 0 20px 48px rgba(0, 0, 0, 0.48);
+}
+
+.install-modal h2 {
+	margin-bottom: 8px;
+}
+
+.install-steps {
+	margin-top: 14px;
+	padding: 10px 12px;
+	border-radius: var(--radius-sm);
+	background: rgba(56, 189, 248, 0.08);
+	color: #bae6fd;
+	font-size: 0.92rem;
+}
+
+.install-actions {
+	margin-top: 18px;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+}
+
+.usage-totals {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 10px;
+	margin: 12px 0;
+}
+
+.usage-totals > div {
+	padding: 12px;
+	border-radius: var(--radius-sm);
+	background: var(--bg);
+}
+
+.usage-totals span,
+.usage-totals small {
+	display: block;
+	color: var(--muted);
+	font-size: 0.78rem;
+}
+
+.usage-totals strong {
+	display: block;
+	font-size: 1.2rem;
+	margin: 2px 0;
+}
+
 .spinner {
 	width: 18px;
 	height: 18px;

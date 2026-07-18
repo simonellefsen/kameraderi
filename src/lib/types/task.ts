@@ -40,6 +40,8 @@ export interface Task {
 	cameraSetup?: CameraSetup; // how to configure the camera (esp. for beginners)
 	context: SessionContext;
 	rig: ActiveRig;
+	/** `fallback` is a bundled local brief; absent is retained for existing LLM-generated tasks. */
+	generationSource?: 'llm' | 'fallback';
 	/** A real place the task sends the user to, for an "open in maps" action. */
 	destination?: TaskDestination;
 }

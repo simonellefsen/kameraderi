@@ -5,6 +5,80 @@ at the top. Use absolute dates.
 
 ---
 
+## 2026-07-18 — Local fallback practice briefs
+
+- Added a bundled local task path for users without an API key and for offline sessions. It uses
+  the gathered light/weather context and selected rig, then passes through `enforceFeasibility` just
+  like an LLM response. It makes no provider request, incurs no token cost, and is explicitly
+  labelled in the session UI.
+- Added unit coverage for the local source marker plus aperture and ISO limits, and documented the
+  behavior in [local-fallback-tasks.md](concepts/local-fallback-tasks.md) and the manual QA runbook.
+
+## 2026-07-18 — Explicit Android PWA installation guidance
+
+Expanded the existing install modal's cross-browser native-prompt path with Android-aware guidance.
+Android users now see a localized modal even when their browser does not expose
+`beforeinstallprompt`: it explains the browser-menu **Install app** / **Add to Home screen** route.
+When the native event is available, the modal continues to invoke the browser's own trusted install
+dialog. iOS retains its separate Safari Share → Add to Home Screen flow; installed standalone apps
+on either platform are never prompted again.
+
+## 2026-07-18 — Recommend Adobe Project Indigo for supported iPhones
+
+The iPhone session brief now recommends [Adobe Project Indigo](sources/project-indigo.md) over the
+built-in Camera app when the selected rig is an Apple iPhone. The note links to Indigo's App Store
+page and makes the intended handoff explicit: shoot in Indigo, then return to Kameraderi and upload
+the original image. It is deliberately absent for every non-iPhone rig because Indigo currently has
+no Android release; Android users keep their existing camera-app/upload workflow.
+
+## 2026-07-18 — Specific iPhone model + rear-camera selection
+
+Replaced the generic iPhone profile with an explicit, feasibility-safe phone catalog.
+
+- Gear now has an iPhone model selector covering the iPhone 15, 16, and 17 families, including
+  Plus/Air/Pro/Pro Max variants where shipped. Selecting a model exposes only its real rear cameras.
+- Each rear camera is a fixed, body-compatible lens with Apple-published 35mm-equivalent focal
+  length, maximum aperture, and optical/sensor-shift stabilisation. The usual capability engine
+  therefore clamps briefs to the selected camera, not a fictional continuous phone zoom.
+- Removed capture-time mutation of the phone profile from EXIF. The browser cannot reliably know
+  the current phone's complete hardware; EXIF remains submission metadata, while the user owns the
+  model choice. Existing `source: user` gear is never overwritten by catalog migration.
+- Added model/camera compatibility coverage (95 tests total). Source rationale and official Apple
+  specification links live in [sources/iphone-camera-catalog.md](sources/iphone-camera-catalog.md).
+
+## 2026-07-18 — Offline evaluation queue
+
+Completed the next Phase 3 resilience item: a submitted photo is no longer lost if connectivity
+drops before its vision critique can run.
+
+- Added Dexie v4's `pendingEvaluations` table. Queue rows reference the existing downscaled photo,
+  task, submission, and unfinished coaching session — no duplicate photo data or originals — and
+  retain the selected provider + vision model without storing credentials.
+- Offline submissions are atomically persisted as a pending evaluation. Kameraderi resumes them
+  oldest-first on app launch and whenever the browser emits `online`; a successful result completes
+  the original coaching session and updates the open session view. Queueing is foreground-only,
+  intentionally making no unreliable iOS background-sync promise.
+- Provider/model selection is now an explicit evaluation input, which lets a queued photo use the
+  chosen provider/model even if the user changes their active Settings choice before reconnecting.
+- Added mocked unit coverage for atomic/idempotent queue persistence; `pnpm check` and `pnpm test`
+  pass with 92 tests. Added the disconnect/reconnect walkthrough to the manual QA runbook.
+
+## 2026-07-18 — Local token meter and install-to-home-screen prompt
+
+Completed the next Phase 3 cost-control item and made the PWA's installation path visible in-app.
+
+- Added Dexie v3's `usageEvents` table. Every real task, evaluation, and AI gear-lookup call records
+  its input/output token counts locally; schema-validation retries record as separate calls, while
+  cache hits remain free and excluded. Entries older than 60 days are swept on launch.
+- Settings now shows today's and trailing-30-day token totals/call counts, offers an optional local
+  rolling budget, and warns when it is reached. It is a soft warning only — it never blocks coaching.
+- Added a localized install modal. iOS/iPadOS Safari users get Share → Add to Home Screen guidance;
+  browsers that emit `beforeinstallprompt` receive their native installation flow. It never appears
+  in standalone mode, and dismissing it is stored in IndexedDB settings rather than localStorage.
+- Added install-environment unit coverage. `pnpm check`, `pnpm test` (90 tests), and `pnpm build`
+  all pass. The production build retains the existing harmless Workbox glob warning for an absent
+  prerendered directory.
+
 ## 2026-07-18 — Renamed Iris → Kameraderi; repo moved
 
 Project renamed from **Iris** to **Kameraderi** (Danish *kamera* + French *camaraderie*), and the

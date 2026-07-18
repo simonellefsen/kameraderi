@@ -4,6 +4,7 @@ import type { ChatMessage } from '$lib/llm/provider';
 import { settings } from '$lib/stores/settings.svelte';
 import { getCacheEntry, setCacheEntry } from '$lib/cache/aiCache';
 import { gearFullKey } from '$lib/cache/aiCacheKey';
+import { recordUsage } from '$lib/usage/usageMeter';
 import type { CameraBody, Lens, SensorFormat } from '$lib/types/gear';
 import type { Result } from '$lib/utils/result';
 import { err, ok } from '$lib/utils/result';
@@ -93,6 +94,9 @@ async function runCachedStructured<T>(
 	});
 	const parsed = zodSchema.parse(json);
 	await setCacheEntry(key, kind, provider.id, modelId, parsed, usage, GEAR_CACHE_TTL_HOURS);
+	void recordUsage(kind, provider.id, modelId, usage).catch((e) =>
+		console.warn('Could not record gear lookup token usage', e)
+	);
 	return parsed;
 }
 

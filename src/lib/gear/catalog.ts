@@ -1,9 +1,10 @@
 import catalogData from './catalog.json';
 import { db } from '$lib/db/schema';
 import type { CameraBody, Lens } from '$lib/types/gear';
+import { IPHONE_BODIES, IPHONE_LENSES } from './iphoneCatalog';
 
-export const CATALOG_BODIES = catalogData.bodies as CameraBody[];
-export const CATALOG_LENSES = catalogData.lenses as Lens[];
+export const CATALOG_BODIES = [...(catalogData.bodies as CameraBody[]), ...IPHONE_BODIES];
+export const CATALOG_LENSES = [...(catalogData.lenses as Lens[]), ...IPHONE_LENSES];
 
 /** Seed the curated catalog into IndexedDB on first run. Idempotent. */
 export async function seedCatalogIfEmpty(): Promise<void> {
@@ -13,20 +14,18 @@ export async function seedCatalogIfEmpty(): Promise<void> {
 	await db().lenses.bulkPut(CATALOG_LENSES);
 }
 
-/**
- * Corrections to already-seeded catalog rows on existing installs (seeding is skipped once
- * data exists). Only touches rows still untouched by the user (source === 'catalog'). Ids stay
- * stable. Generalise the iPhone seed — we can't know the exact model until a capture's EXIF.
- */
+/** Update/extend catalog rows on existing installs without overwriting user-owned gear. */
 export async function migrateCatalog(): Promise<void> {
-	const phone = await db().bodies.get('body_iphone_15_pro');
-	if (phone?.source === 'catalog' && phone.model === 'iPhone 15 Pro') {
-		await db().bodies.update(phone.id, { model: 'iPhone' });
-	}
-	const phoneLens = await db().lenses.get('lens_iphone_15_pro_main');
-	if (phoneLens?.source === 'catalog' && phoneLens.model === 'iPhone 15 Pro main (35mm-equiv)') {
-		await db().lenses.update(phoneLens.id, { model: 'iPhone main (35mm-equiv)' });
-	}
+	await db().transaction('rw', db().bodies, db().lenses, async () => {
+		for (const body of CATALOG_BODIES) {
+			const existing = await db().bodies.get(body.id);
+			if (!existing || existing.source === 'catalog') await db().bodies.put(body);
+		}
+		for (const lens of CATALOG_LENSES) {
+			const existing = await db().lenses.get(lens.id);
+			if (!existing || existing.source === 'catalog') await db().lenses.put(lens);
+		}
+	});
 }
 
 export async function allBodies(): Promise<CameraBody[]> {

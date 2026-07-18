@@ -6,8 +6,9 @@ prime. Kameraderi prevents this in code, not by hoping the LLM behaves.
 
 ## The pieces
 
-- **Catalog** ([gear/catalog.json](../../src/lib/gear/catalog.json) + `catalog.ts`) — curated body
-  and lens data the user can extend. Each item carries a `source` (`catalog | llm-augmented | user`).
+- **Catalog** ([gear/catalog.json](../../src/lib/gear/catalog.json),
+  [iphoneCatalog.ts](../../src/lib/gear/iphoneCatalog.ts), and `catalog.ts`) — curated body and
+  lens data the user can extend. Each item carries a `source` (`catalog | llm-augmented | user`).
 - **LLM augmentation** ([gear/augment.ts](../../src/lib/gear/augment.ts)) — for unknown gear, the
   LLM fills in specs, tagged `llm-augmented` and shown with an **"unverified" badge** + easy edit
   path (the model can guess a max aperture wrong, which would mis-constrain tasks).
@@ -35,8 +36,9 @@ available at the requested focal length. This is what the feasibility guard clam
    focal length (`equivFocal` applies crop factor), relaxed when the rig has IBIS/OIS.
 4. Apply the same aperture clamp to the task's `suggestedExposure`.
 
-Phone-fixed bodies have no lens; the engine defaults to a sensible focal range so the loop still
-works (see `rigCapabilities`).
+For a curated iPhone, each real rear camera is an explicit fixed-focal lens restricted by
+`compatibleBodyIds` to its matching model. The user selects the intended Ultra Wide, Main, or
+Telephoto camera, so the engine never treats gaps between Apple camera focal lengths as a zoom.
 
 ## Crop factor / 35mm equivalence
 

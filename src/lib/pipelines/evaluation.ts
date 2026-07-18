@@ -1,14 +1,16 @@
 import type { ChatMessage } from '$lib/llm/provider';
-import { activeProvider } from '$lib/llm/registry';
+import { activeProvider, getProvider } from '$lib/llm/registry';
 import { zodToJsonSchema } from '$lib/llm/structured';
 import type { DownscaledImage } from '$lib/media/downscale';
 import { resolveRig, rigCapabilities } from '$lib/gear/capability';
 import { getBody, getLens } from '$lib/gear/catalog';
 import { settings } from '$lib/stores/settings.svelte';
 import { localeMeta } from '$lib/i18n/locales';
+import { recordUsage } from '$lib/usage/usageMeter';
 import type { Evaluation } from '$lib/types/evaluation';
 import type { ExifSnapshot } from '$lib/types/submission';
 import type { Task } from '$lib/types/task';
+import type { ProviderKey } from '$lib/types/settings';
 import { errorMessage, err, ok, type Result } from '$lib/utils/result';
 import { uid } from '$lib/utils/id';
 import { evalSystemPrompt, buildEvalUserPrompt } from './prompts/evalSystem';
@@ -19,6 +21,9 @@ export interface EvaluateInput {
 	photo: DownscaledImage;
 	exif: ExifSnapshot;
 	submissionId: string;
+	/** Retain the original provider/model when an offline submission resumes later. */
+	providerKey?: ProviderKey;
+	visionModel?: string;
 }
 
 function clamp(n: number, min: number, max: number): number {
@@ -30,7 +35,8 @@ function clamp(n: number, min: number, max: number): number {
  * If overallScore is omitted, derive it from the mean of the dimension scores.
  */
 export async function evaluateSubmission(input: EvaluateInput): Promise<Result<Evaluation, string>> {
-	const provider = activeProvider();
+	const provider = input.providerKey ? getProvider(input.providerKey) : activeProvider();
+	const visionModel = input.visionModel ?? settings.current.providers[provider.id].visionModel;
 	if (!provider.supportsVision) {
 		return err(`The active provider (${provider.id}) does not support image input.`);
 	}
@@ -58,9 +64,14 @@ export async function evaluateSubmission(input: EvaluateInput): Promise<Result<E
 			schema,
 			schemaName: 'photo_evaluation',
 			vision: true,
+			model: visionModel,
 			temperature: 0.3
 		});
+		void recordUsage('eval', provider.id, visionModel, first.usage).catch((e) =>
+			console.warn('Could not record evaluation token usage', e)
+		);
 		const r = evaluationOutputSchema.safeParse(first.json);
+		let usage = first.usage;
 		if (r.success) {
 			output = r.data;
 		} else {
@@ -75,8 +86,13 @@ export async function evaluateSubmission(input: EvaluateInput): Promise<Result<E
 				schema,
 				schemaName: 'photo_evaluation',
 				vision: true,
+				model: visionModel,
 				temperature: 0.2
 			});
+			void recordUsage('eval', provider.id, visionModel, retry.usage).catch((e) =>
+				console.warn('Could not record evaluation token usage', e)
+			);
+			usage = retry.usage;
 			const r2 = evaluationOutputSchema.safeParse(retry.json);
 			if (!r2.success) return err(`The model's evaluation was invalid: ${r2.error.message}`);
 			output = r2.data;
@@ -100,7 +116,7 @@ export async function evaluateSubmission(input: EvaluateInput): Promise<Result<E
 		strengths: output.strengths,
 		improvements: output.improvements,
 		constraintViolations: output.constraintViolations,
-		modelUsed: settings.current.providers[settings.current.activeProvider].visionModel
+		modelUsed: visionModel
 	};
 
 	return ok(evaluation);

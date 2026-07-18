@@ -18,10 +18,19 @@
 	import { mapsUrl, linkifyDestination } from '$lib/utils/maps';
 	import { difficultyLabel, motionLabel, t } from '$lib/i18n';
 	import { uid } from '$lib/utils/id';
+	import {
+		isOffline,
+		PENDING_EVALUATION_COMPLETE,
+		queueEvaluation,
+		type PendingEvaluationComplete
+	} from '$lib/queue/pendingEvaluations';
+	import { PROVIDERS } from '$lib/llm/providers';
 	import type { NearbyPlace } from '$lib/types/context';
 	import type { CoachingSession } from '$lib/types/session';
 	import type { Submission } from '$lib/types/submission';
 	import type { Task } from '$lib/types/task';
+
+	const PROJECT_INDIGO_URL = 'https://apps.apple.com/us/app/project-indigo/id6742591546';
 
 	const bodies = useLiveQuery(() => allBodies());
 	const lenses = useLiveQuery(() => allLenses());
@@ -42,6 +51,14 @@
 	// (the store is a singleton, so client-side nav keeps state without a restore).
 	onMount(() => {
 		if (session.phase === 'idle') session.restore();
+		const onPendingEvaluationComplete = (event: Event) => {
+			const { detail } = event as CustomEvent<PendingEvaluationComplete>;
+			if (session.submission?.id !== detail.submissionId) return;
+			session.evaluation = detail.evaluation;
+			session.phase = 'done';
+		};
+		window.addEventListener(PENDING_EVALUATION_COMPLETE, onPendingEvaluationComplete);
+		return () => window.removeEventListener(PENDING_EVALUATION_COMPLETE, onPendingEvaluationComplete);
 	});
 	// Persist on every meaningful change (save() reads the reactive fields, so this re-runs).
 	$effect(() => {
@@ -74,10 +91,6 @@
 	async function start() {
 		if (!hasRig) {
 			session.error = t('session.errorNoCamera');
-			return;
-		}
-		if (!hasKey) {
-			session.error = t('session.errorNoKey');
 			return;
 		}
 		// A prior task in this session means the user is explicitly asking for something
@@ -135,19 +148,6 @@
 			const file = outcome.file;
 			const exif = await parseExif(file);
 
-			// We can't read the phone model from the browser, but an in-app capture's EXIF
-			// is the real device — use it to correct the phone body (e.g. "iPhone 15 Pro" → "17 Pro").
-			if (source === 'capture' && activeBody?.isPhone && exif.make && exif.model) {
-				const detected = `${exif.make} ${exif.model}`.trim();
-				if (detected.toLowerCase() !== `${activeBody.make} ${activeBody.model}`.trim().toLowerCase()) {
-					await db().bodies.update(activeBody.id, {
-						make: exif.make,
-						model: exif.model,
-						source: 'user'
-					});
-				}
-			}
-
 			const photo = await downscaleToJpeg(file);
 			const thumbnail = await makeThumbnailDataUrl(file);
 			const photoKey = await putPhoto(photo.blob);
@@ -167,6 +167,16 @@
 			};
 			await db().submissions.put(submission);
 			session.submission = submission;
+			if (isOffline()) {
+				if (!PROVIDERS[settings.current.activeProvider].supportsVision) {
+					session.error = `The active provider (${settings.current.activeProvider}) does not support image input.`;
+					session.phase = 'task';
+					return;
+				}
+				await queueEvaluation(task, submission);
+				session.phase = 'queued';
+				return;
+			}
 			session.phase = 'evaluating';
 			const res = await evaluateSubmission({
 				task,
@@ -175,6 +185,11 @@
 				submissionId
 			});
 			if (!res.ok) {
+				if (isOffline()) {
+					await queueEvaluation(task, submission);
+					session.phase = 'queued';
+					return;
+				}
 				session.error = res.error;
 				session.phase = 'task';
 				return;
@@ -219,9 +234,9 @@
 			<p class="muted">{t('session.noCamera')}</p>
 		{/if}
 		{#if !hasKey}
-			<div class="note">{t('session.addKeyNoteStart')} <a href="/settings">{t('nav.setup')}</a> {t('session.addKeyNoteEnd')}</div>
+			<div class="note">{t('session.noKeyFallbackStart')} <a href="/settings">{t('nav.setup')}</a> {t('session.noKeyFallbackEnd')}</div>
 		{/if}
-		<button class="btn btn-primary btn-block" onclick={start} disabled={!hasRig || !hasKey}>
+		<button class="btn btn-primary btn-block" onclick={start} disabled={!hasRig}>
 			{t('session.generateTask')}
 		</button>
 	</div>
@@ -274,7 +289,9 @@
 		</div>
 	{/if}
 
-	{#if session.phase === 'submitting' || session.phase === 'evaluating'}
+	{#if session.phase === 'queued'}
+		<div class="note">{t('session.evaluationQueued')}</div>
+	{:else if session.phase === 'submitting' || session.phase === 'evaluating'}
 		<div class="card row">
 			<span class="spinner"></span>
 			<span>{session.phase === 'submitting' ? t('session.preparing') : t('session.critiquing')}</span>
@@ -289,6 +306,9 @@
 		{@const loc = session.task.context.location}
 		<!-- Task card -->
 		<div class="card">
+			{#if session.task.generationSource === 'fallback'}
+				<div class="note" style="margin: 0 0 10px;">{t('session.localBrief')}</div>
+			{/if}
 			<div class="chips" style="margin-bottom: 10px;">
 				<span class="chip chip-diff {session.task.difficulty}">{difficultyLabel(session.task.difficulty)}</span>
 				{#each session.task.techniqueTags as tag}
@@ -367,6 +387,14 @@
 			{/if}
 
 			<div style="margin-top: 14px;">
+				{#if activeBody?.isPhone && activeBody.make === 'Apple'}
+					<div class="note" style="margin-bottom: 10px;">
+						<strong>{t('session.projectIndigoTitle')}</strong>
+						<p>
+							{t('session.projectIndigoBefore')}<a href={PROJECT_INDIGO_URL} target="_blank" rel="noopener">Project Indigo ↗</a>{t('session.projectIndigoAfter')}
+						</p>
+					</div>
+				{/if}
 				<button class="btn btn-primary btn-block" onclick={() => submit('capture')}>
 					{t('session.captureSubmit')}
 				</button>

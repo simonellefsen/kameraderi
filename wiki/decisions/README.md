@@ -6,6 +6,7 @@ revisit**" constraints — change them only with a new dated decision that super
 
 | Date | Decision |
 |------|----------|
+| 2026-07-18 | [Select a specific iPhone model and camera](2026-07-18-iphone-model-selection.md) |
 | 2026-07-11 | [AI response cache — coarsening + variant-counter design](2026-07-11-ai-response-cache-design.md) |
 | 2026-06-21 | [Multilingual UI + LLM output (English, Danish)](2026-06-21-multilingual-ui-and-tasks.md) |
 | 2026-06-20 | [Pure client-side PWA, no backend](2026-06-20-client-side-pwa-no-backend.md) |

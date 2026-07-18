@@ -5,7 +5,10 @@
 	import { settings } from '$lib/stores/settings.svelte';
 	import { migrateCatalog, seedCatalogIfEmpty } from '$lib/gear/catalog';
 	import { sweepExpiredAiCache } from '$lib/cache/aiCache';
+	import { sweepOldUsageEvents } from '$lib/usage/usageMeter';
+	import { processPendingEvaluations } from '$lib/queue/pendingEvaluations';
 	import { detectBrowserLocale, t } from '$lib/i18n';
+	import InstallPrompt from '$lib/components/InstallPrompt.svelte';
 
 	let { children } = $props();
 
@@ -18,13 +21,23 @@
 			console.warn('Catalog seed/migrate failed', e);
 		}
 		await settings.load();
-		// Best-effort housekeeping: drop expired AI cache rows. Never blocks first paint.
+		// Best-effort housekeeping: drop expired AI cache rows / stale usage events. Never blocks first paint.
 		sweepExpiredAiCache().catch((e) => console.warn('AI cache sweep failed', e));
+		sweepOldUsageEvents().catch((e) => console.warn('Usage sweep failed', e));
+		processPendingEvaluations().catch((e) => console.warn('Pending evaluation resume failed', e));
 		// First run (no persisted record yet): adopt the browser's language so the
 		// app starts in the user's preferred language. Persisted users keep their choice.
 		if (!settings.persisted) {
 			await settings.save({ ...settings.current, locale: detectBrowserLocale() });
 		}
+	});
+
+	onMount(() => {
+		const resumePendingEvaluations = () => {
+			processPendingEvaluations().catch((e) => console.warn('Pending evaluation resume failed', e));
+		};
+		window.addEventListener('online', resumePendingEvaluations);
+		return () => window.removeEventListener('online', resumePendingEvaluations);
 	});
 
 	// $derived so nav labels re-render when the locale changes.
@@ -53,3 +66,5 @@
 		</a>
 	{/each}
 </nav>
+
+<InstallPrompt />

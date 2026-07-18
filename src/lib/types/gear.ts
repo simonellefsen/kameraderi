@@ -51,6 +51,8 @@ export interface Lens {
 	focalLengthMm: { min: number; max: number };
 	maxAperture: ApertureStep[]; // sorted ascending by focalLength
 	hasOIS: boolean; // optical stabilization
+	/** Restrict a fixed camera to its real body (e.g. an iPhone's rear camera). */
+	compatibleBodyIds?: string[];
 	filterThreadMm?: number;
 	source: GearSource;
 }

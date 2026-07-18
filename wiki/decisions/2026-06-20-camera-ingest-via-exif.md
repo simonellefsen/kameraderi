@@ -25,6 +25,10 @@ camera → its own app (e.g. Canon Camera Connect over Wi-Fi/BT) → phone camer
 - **Ingest** = camera-roll / Files **upload** + **EXIF parse**; phone mode also offers in-app
   capture via `<input type="file" accept="image/*" capture="environment">` (most robust across
   iOS/Android/desktop). `getUserMedia` only for an optional live preview.
+- **Recommended iPhone capture app** = Adobe Project Indigo where supported. It is an optional
+  iPhone/iPad-only workflow: shoot in Indigo, return to Kameraderi, and upload the original photo.
+  See [Project Indigo source note](../sources/project-indigo.md). Android users continue with their
+  selected camera app and upload flow.
 - **EXIF is how we learn the actual gear/settings** for a shot
   ([media/exif.ts](../../src/lib/media/exif.ts), exifr). Parse the raw `File` **before** any canvas
   op, because canvas strips metadata ([media/downscale.ts](../../src/lib/media/downscale.ts)).

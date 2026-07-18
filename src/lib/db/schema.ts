@@ -6,6 +6,7 @@ import type { Submission } from '$lib/types/submission';
 import type { Evaluation } from '$lib/types/evaluation';
 import type { CoachingSession } from '$lib/types/session';
 import type { Settings } from '$lib/types/settings';
+import type { ProviderKey } from '$lib/types/settings';
 
 export const SETTINGS_KEY = 'app';
 export type SettingsRecord = Settings & { id: string };
@@ -35,6 +36,29 @@ export interface AiCacheVariantRow {
 	updatedAt: number;
 }
 
+/** One real (non-cached) LLM call's token cost, for the local usage meter. */
+export interface UsageEvent {
+	id: string;
+	createdAt: number;
+	kind: 'task' | 'eval' | 'gearLens' | 'gearBody';
+	provider: string;
+	model: string;
+	inputTokens: number;
+	outputTokens: number;
+}
+
+/** An evaluation waiting for connectivity; its task, submission, and photo already live in IndexedDB. */
+export interface PendingEvaluation {
+	submissionId: string;
+	taskId: string;
+	sessionId: string;
+	queuedAt: number;
+	provider: ProviderKey;
+	visionModel: string;
+	attempts: number;
+	lastError?: string;
+}
+
 export class KameraderiDB extends Dexie {
 	settings!: Table<SettingsRecord, string>;
 	bodies!: Table<CameraBody, string>;
@@ -47,6 +71,8 @@ export class KameraderiDB extends Dexie {
 	photos!: Table<PhotoBlobRecord, string>;
 	aiCache!: Table<AiCacheEntry, string>;
 	aiCacheVariants!: Table<AiCacheVariantRow, string>;
+	usageEvents!: Table<UsageEvent, string>;
+	pendingEvaluations!: Table<PendingEvaluation, string>;
 
 	constructor() {
 		super('kameraderi');
@@ -64,6 +90,12 @@ export class KameraderiDB extends Dexie {
 		this.version(2).stores({
 			aiCache: '&key, kind, expiresAt',
 			aiCacheVariants: '&baseKey, updatedAt'
+		});
+		this.version(3).stores({
+			usageEvents: '&id, createdAt'
+		});
+		this.version(4).stores({
+			pendingEvaluations: '&submissionId, queuedAt'
 		});
 	}
 }

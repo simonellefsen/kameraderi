@@ -10,7 +10,7 @@ Source of truth: [src/lib/db/schema.ts](../src/lib/db/schema.ts) (the `Kamerader
 [src/lib/types/](../src/lib/types/) (the domain types). **This document is the contract** — keep
 the Dexie store definition, the TS types, and this page in sync.
 
-## Tables (Dexie v2)
+## Tables (Dexie v4)
 
 ```
 -- v1 --
@@ -26,6 +26,10 @@ photos         &key, createdAt                  (raw Blob store)
 -- v2 --
 aiCache          &key, kind, expiresAt           (cached, Zod-validated LLM responses)
 aiCacheVariants  &baseKey, updatedAt             ("New task" variant counters)
+-- v3 --
+usageEvents       &id, createdAt                  (local LLM token meter)
+-- v4 --
+pendingEvaluations &submissionId, queuedAt        (foreground-resumable offline evaluations)
 ```
 
 `&` marks the primary key; the remaining names are secondary indexes (FKs + `createdAt` for
@@ -33,6 +37,9 @@ time-ordered history). The `photos` table holds `{ key, blob, createdAt }` recor
 `submission.photoBlobKey`. `aiCache`/`aiCacheVariants` back the
 [AI response cache](concepts/ai-response-cache.md) — see
 [decisions/2026-07-11-ai-response-cache-design.md](decisions/2026-07-11-ai-response-cache-design.md).
+`pendingEvaluations` holds only references to an existing task, submission, photo Blob, and
+unfinished coaching session, plus the provider/model selected at queue time. See
+[offline-evaluation-queue.md](concepts/offline-evaluation-queue.md).
 
 > Schema migrations use Dexie's versioning: bump `this.version(n).stores({...})` in
 > [schema.ts](../src/lib/db/schema.ts) and add an `.upgrade()` if data needs transforming. Update
@@ -45,9 +52,11 @@ Full TypeScript lives in [src/lib/types/](../src/lib/types/). Sketches:
 ### Gear ([types/gear.ts](../src/lib/types/gear.ts))
 - **CameraBody** — `make, model, mount, sensor format, sensorSizeMm, cropFactor, megapixels,
   hasIBIS, maxShutter, iso range, isPhone, source(catalog|llm-augmented|user)`.
+
 - **Lens** — `make, model, mount, isPrime, focalLengthMm (prime number or {min,max}),
   maxAperture: {focalLength, maxAperture}[]` (handles variable-aperture zooms like a 24-105
-  f/4-7.1), `hasOIS, source`.
+  f/4-7.1), `hasOIS, compatibleBodyIds?`, `source`. `compatibleBodyIds` constrains curated
+  fixed cameras (such as iPhone Ultra Wide/Main/Telephoto) to their real bodies.
 - **GearProfile** — `bodyId + owned lensIds` (what the user owns).
 - **ActiveRig** — `bodyId + selected lensId` (what they're shooting with right now). A phone-fixed
   body has no `lensId`.
@@ -60,6 +69,8 @@ successCriteria[], coachingHints[], difficulty`, plus:
   (which mode-dial position — Av/Tv/M/Fv/P… brand-appropriate — and concrete steps).
 - `destination?: { name, lat?, lon? }` — a real place the task sends you to, used for the
   "open in maps" action (see [utils/maps.ts](../src/lib/utils/maps.ts)).
+- `generationSource?: 'llm' | 'fallback'` — omitted for older/LLM tasks; `fallback` marks a local,
+  zero-token practice brief (see [local-fallback-tasks.md](concepts/local-fallback-tasks.md)).
 - embedded `context` and `rig`.
 
 The LLM output is validated by `taskOutputSchema`

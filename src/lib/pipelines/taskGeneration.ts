@@ -8,6 +8,7 @@ import { settings } from '$lib/stores/settings.svelte';
 import { localeMeta, uiKeyFor } from '$lib/i18n/locales';
 import { getCacheEntry, resolveVariant, setCacheEntry } from '$lib/cache/aiCache';
 import { taskBaseKey, taskFullKey } from '$lib/cache/aiCacheKey';
+import { recordUsage } from '$lib/usage/usageMeter';
 import type { NearbyPlace, SessionContext } from '$lib/types/context';
 import type { ActiveRig } from '$lib/types/gear';
 import type { Task, TaskDestination } from '$lib/types/task';
@@ -16,6 +17,7 @@ import { findMentionedPlace } from '$lib/utils/maps';
 import { uid } from '$lib/utils/id';
 import { taskSystemPrompt, buildTaskUserPrompt } from './prompts/taskSystem';
 import { taskOutputSchema, type TaskOutput } from './schemas';
+import { createFallbackTask } from './fallbackTasks';
 
 export interface GenerateTaskOptions {
 	/** Reuse already-gathered context (e.g. when re-rolling for a chosen place) instead of re-fetching. */
@@ -62,6 +64,19 @@ export async function generateTask(
 		return err(errorMessage(e));
 	}
 	const cap = rigCapabilities(body, lens);
+	const fallbackTask = () => {
+		const task = createFallbackTask(rig, cap, context, ui, settings.current.skillLevel);
+		const destination: TaskDestination | undefined = opts.focusPlace
+			? { name: opts.focusPlace.name, lat: opts.focusPlace.lat, lon: opts.focusPlace.lon }
+			: undefined;
+		return ok(destination ? { ...task, destination } : task);
+	};
+
+	// A useful practice brief must not depend on credentials or a connection. Unlike a cached LLM
+	// result, it is intentionally not persisted in the AI cache and costs no provider tokens.
+	if (!settings.active.apiKey || (typeof navigator !== 'undefined' && !navigator.onLine)) {
+		return fallbackTask();
+	}
 
 	const messages: ChatMessage[] = [
 		{ role: 'system', content: taskSystemPrompt(languageName) },
@@ -111,6 +126,9 @@ export async function generateTask(
 				schemaName: 'photo_task',
 				temperature: 0.8
 			});
+			void recordUsage('task', provider.id, modelId, first.usage).catch((e) =>
+				console.warn('Could not record task token usage', e)
+			);
 			const r = taskOutputSchema.safeParse(first.json);
 			usage = first.usage;
 			if (r.success) {
@@ -128,12 +146,16 @@ export async function generateTask(
 					schemaName: 'photo_task',
 					temperature: 0.4
 				});
+				void recordUsage('task', provider.id, modelId, retry.usage).catch((e) =>
+					console.warn('Could not record task token usage', e)
+				);
 				usage = retry.usage;
 				const r2 = taskOutputSchema.safeParse(retry.json);
 				if (!r2.success) return err(`The model's task output was invalid: ${r2.error.message}`);
 				output = r2.data;
 			}
 		} catch (e) {
+			if (typeof navigator !== 'undefined' && !navigator.onLine) return fallbackTask();
 			return err(`Task generation failed: ${errorMessage(e)}`);
 		}
 		await setCacheEntry(fullKey, 'task', provider.id, modelId, output, usage, settings.current.aiCacheTtlHours);

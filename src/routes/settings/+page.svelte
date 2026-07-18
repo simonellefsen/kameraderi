@@ -5,6 +5,12 @@
 	import { createProvider } from '$lib/llm/registry';
 	import { SUPPORTED_LOCALES, t } from '$lib/i18n';
 	import { aiCacheEntryCount, aiCacheStats, clearAiCache } from '$lib/cache/aiCache';
+	import {
+		rollingMonthlyUsage,
+		todayUsage,
+		type UsageTotals
+	} from '$lib/usage/usageMeter';
+	import { isOverBudget } from '$lib/usage/usageMath';
 	import type { ProviderKey, Settings } from '$lib/types/settings';
 	import type { ValidationResult } from '$lib/llm/provider';
 
@@ -23,12 +29,24 @@
 	let cacheTokensSaved = $state(0);
 	let clearingCache = $state(false);
 	let cacheCleared = $state(false);
+	let todayTokens = $state<UsageTotals>({ calls: 0, inputTokens: 0, outputTokens: 0, totalTokens: 0 });
+	let monthlyTokens = $state<UsageTotals>({ calls: 0, inputTokens: 0, outputTokens: 0, totalTokens: 0 });
+	let refreshingUsage = $state(false);
 
 	async function refreshCacheStats() {
 		cacheEntries = await aiCacheEntryCount();
 		const s = aiCacheStats();
 		cacheHits = s.hits;
 		cacheTokensSaved = s.tokensSaved;
+	}
+
+	async function refreshUsage() {
+		refreshingUsage = true;
+		try {
+			[todayTokens, monthlyTokens] = await Promise.all([todayUsage(), rollingMonthlyUsage()]);
+		} finally {
+			refreshingUsage = false;
+		}
 	}
 
 	onMount(async () => {
@@ -41,7 +59,7 @@
 			loadError = e instanceof Error ? e.message : String(e);
 			draft = clone(defaultSettings());
 		}
-		await refreshCacheStats();
+		await Promise.all([refreshCacheStats(), refreshUsage()]);
 	});
 
 	async function clearCache() {
@@ -57,6 +75,13 @@
 	}
 
 	const activeKey = $derived(draft?.activeProvider ?? 'openrouter');
+	const overBudget = $derived(isOverBudget(monthlyTokens, draft?.monthlyTokenBudget ?? null));
+
+	function setMonthlyTokenBudget(event: Event) {
+		if (!draft) return;
+		const value = (event.currentTarget as HTMLInputElement).valueAsNumber;
+		draft.monthlyTokenBudget = Number.isFinite(value) && value > 0 ? Math.round(value) : null;
+	}
 
 	async function save() {
 		if (!draft) return;
@@ -183,6 +208,41 @@
 		{#if cacheCleared}
 			<div class="note" style="margin-top: 8px;">{t('setup.aiCacheCleared')}</div>
 		{/if}
+	</div>
+
+	<div class="card">
+		<h3 style="margin-top: 0;">{t('setup.tokenUsage')}</h3>
+		<p class="muted" style="font-size: 0.85rem;">{t('setup.tokenUsageHint')}</p>
+		<div class="usage-totals">
+			<div>
+				<span>{t('setup.usageToday')}</span>
+				<strong>{todayTokens.totalTokens.toLocaleString()}</strong>
+				<small>{t('setup.usageCalls', { calls: todayTokens.calls })}</small>
+			</div>
+			<div>
+				<span>{t('setup.usageLast30Days')}</span>
+				<strong>{monthlyTokens.totalTokens.toLocaleString()}</strong>
+				<small>{t('setup.usageCalls', { calls: monthlyTokens.calls })}</small>
+			</div>
+		</div>
+		<label for="tokenbudget">{t('setup.usageBudget')}</label>
+		<input
+			id="tokenbudget"
+			type="number"
+			min="1"
+			step="1"
+			value={draft.monthlyTokenBudget ?? ''}
+			onchange={setMonthlyTokenBudget}
+		/>
+		<p class="muted" style="font-size: 0.8rem;">{t('setup.usageBudgetHint')}</p>
+		{#if overBudget}
+			<div class="error" style="margin-top: 8px;">{t('setup.usageOverBudget')}</div>
+		{/if}
+		<div class="row" style="margin-top: 10px; justify-content: flex-end;">
+			<button class="btn btn-ghost" onclick={refreshUsage} disabled={refreshingUsage}>
+				{t('setup.usageRefresh')}
+			</button>
+		</div>
 	</div>
 
 	<button class="btn btn-primary btn-block" onclick={save} disabled={saving}>

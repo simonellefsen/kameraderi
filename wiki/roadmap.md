@@ -40,37 +40,39 @@ inactivity). Backup/export is a feature, not a nicety — see
 
 ---
 
-## Requirement 1 — Cache AI responses (configurable TTL, 24h default)
+## Requirement 1 — Cache AI responses (configurable TTL, 24h default) — ✅ shipped 2026-07-11
 
-**Goal:** stop paying tokens for responses we already have. Highest-value, do first.
+**Goal:** stop paying tokens for responses we already have. Highest-value, done first.
 
-### What to cache
-| Call | Cache? | Why / TTL |
-|------|--------|-----------|
-| **Task generation** | ✅ | Biggest recurring cost. TTL = `aiCacheTtlHours` (default **24h**). |
-| **Gear augmentation** (lens/body specs) | ✅ | Deterministic by make+model — cache **long (30d)**; specs don't change. |
-| **Evaluation** | ➖ | Each photo is unique. Only cache by exact image hash to absorb accidental double-submits (short TTL). |
+### What's cached
+| Call | Cache? | TTL |
+|------|--------|-----|
+| **Task generation** | ✅ | `Settings.aiCacheTtlHours`, user-editable (default **24h**). |
+| **Gear augmentation** (lens/body specs) | ✅ | Fixed **30 days** — deterministic by make+model. |
+| **Evaluation** | ➖ (not done) | Each photo is unique; no meaningful reuse case. |
 | Weather / geocode / places | ✅ (already) | Handled by the service worker runtime cache. |
 
-### Design
-- New Dexie table **`aiCache`**: `{ key, kind, provider, model, response(JSON), createdAt, expiresAt }`,
-  indexed on `expiresAt` for cheap sweeping. Bump the Dexie version in
-  [db/schema.ts](../src/lib/db/schema.ts) and document in [schema.md](schema.md).
-- **Cache key** = a Web Crypto SHA-256 of a canonical string built from everything that changes the
-  answer: `kind` + `provider` + `model` + `locale` + `skillLevel` + rig (`bodyId`/`lensId`) +
-  **coarsened context** (location snapped to a ~few-hundred-metre grid, light *phase band* not exact
-  minutes, weather bucketed to conditions/cloud-tier) + `focusPlace?.name` + a **variant counter**.
-- **Variant counter** resolves the "cache vs. variety" tension: the *same* inputs return the cached
-  task for free, but **"New task"** (or re-rolling the same place) increments the variant, so the
-  user still gets something fresh — and each variant is itself cached. Material context change
-  resets it.
-- **Wrap, don't scatter:** a thin `cachedGenerateStructured()` around the provider call in the
-  pipelines ([taskGeneration.ts](../src/lib/pipelines/taskGeneration.ts),
-  [gear/augment.ts](../src/lib/gear/augment.ts)) — check cache → on miss call provider → store. Zod
-  validation stays outside so we never cache an invalid payload.
-- **Settings:** `aiCacheEnabled` (default on) + `aiCacheTtlHours` (default 24). A "Clear AI cache"
-  button and a cache-hit/token-saved counter for visibility.
-- **Housekeeping:** sweep expired rows on load; count expired against the "free up space" tool.
+### What shipped
+Full design + rationale: [concepts/ai-response-cache.md](concepts/ai-response-cache.md) and
+[decisions/2026-07-11-ai-response-cache-design.md](decisions/2026-07-11-ai-response-cache-design.md).
+In short:
+- Two new Dexie tables (`aiCache`, `aiCacheVariants`; schema v1→v2) — key derivation is pure/tested
+  in [cache/aiCacheKey.ts](../src/lib/cache/aiCacheKey.ts), storage in
+  [cache/aiCache.ts](../src/lib/cache/aiCache.ts).
+- SHA-256 (Web Crypto) key over provider/model/locale/skill/rig exactly, plus **coarsened** context
+  (location grid, light phase, weather bucket, focus-place name) — see the concept page for why.
+- A **variant counter** so "New task" (and re-tapping the same Nearby place) always asks for a
+  *different* result while a plain repeat (retry after an error, duplicate click) is a free hit.
+- Wired into [taskGeneration.ts](../src/lib/pipelines/taskGeneration.ts) and
+  [gear/augment.ts](../src/lib/gear/augment.ts) (`runCachedStructured`); cache hits are
+  re-validated against the current Zod schema before use.
+- Settings: enable toggle, editable TTL, live stats (entries/hits/est. tokens saved), "Clear AI
+  cache". Expired rows swept opportunistically on app load.
+
+### Not done yet
+- **Cost/token meter** beyond the cache's own "tokens saved" estimate (see backlog below).
+- Counting expired cache rows against the "free up space" storage tool (that tool itself doesn't
+  exist yet either — see Requirement/backlog item F).
 
 ---
 
@@ -159,9 +161,9 @@ Grouped by area; roughly ordered by value-to-effort within each. Nothing here ne
 
 ## Suggested sequencing
 
-- **Phase 3 (next): cost & resilience.** AI response cache (Req 1) → cost/token meter → offline
-  queue + no-key fallback tasks → export/import + "free up space". These protect the user's wallet
-  and their data — the two things a backend would normally guard.
+- **Phase 3 (in progress): cost & resilience.** ~~AI response cache (Req 1)~~ done → cost/token
+  meter → offline queue + no-key fallback tasks → export/import + "free up space". These protect
+  the user's wallet and their data — the two things a backend would normally guard.
 - **Phase 4: coaching value.** Progress analytics → weakness targeting → adaptive difficulty →
   re-shoot & compare. This is what turns a task generator into a *coach*.
 - **Phase 5: reach & richness.** Golden-hour planner + `.ics` → plan-for-a-location → full gear

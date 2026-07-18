@@ -21,3 +21,6 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Local machine-specific Claude Code settings (permissions etc.) — not shared config.
+.claude/settings.local.json

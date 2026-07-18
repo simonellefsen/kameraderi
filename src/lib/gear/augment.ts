@@ -1,11 +1,17 @@
 import { activeProvider } from '$lib/llm/registry';
 import { zodToJsonSchema } from '$lib/llm/structured';
 import type { ChatMessage } from '$lib/llm/provider';
+import { settings } from '$lib/stores/settings.svelte';
+import { getCacheEntry, setCacheEntry } from '$lib/cache/aiCache';
+import { gearFullKey } from '$lib/cache/aiCacheKey';
 import type { CameraBody, Lens, SensorFormat } from '$lib/types/gear';
 import type { Result } from '$lib/utils/result';
 import { err, ok } from '$lib/utils/result';
 import { uid } from '$lib/utils/id';
 import { z } from 'zod';
+
+/** Gear specs are deterministic by make+model — cache far longer than task generation (30 days). */
+const GEAR_CACHE_TTL_HOURS = 24 * 30;
 
 const apertureStepSchema = z.object({
 	focalLength: z.number(),
@@ -54,30 +60,54 @@ const BODY_SYSTEM =
 	'You are an expert photography gear database. Return accurate, real-world specifications for the requested camera body. ' +
 	'mount is lowercase (rf, ef, e, fe, z, m43, phone-fixed). isPhone is true only for smartphones.';
 
-async function runStructured(
+/**
+ * Run a structured gear-spec lookup, checking the (long-TTL, deterministic-by-name) cache
+ * first. A defensive re-validation on cache hits guards against a schema shape change between
+ * app versions — a stale entry is treated as a miss and refetched.
+ */
+async function runCachedStructured<T>(
+	kind: 'gearLens' | 'gearBody',
+	make: string,
+	model: string,
 	system: string,
 	prompt: string,
 	schemaName: string,
-	schema: object
-): Promise<unknown> {
+	zodSchema: z.ZodType<T>
+): Promise<T> {
+	const provider = activeProvider();
+	const modelId = settings.active.textModel;
+	const key = await gearFullKey(kind, provider.id, modelId, make, model);
+
+	const cached = await getCacheEntry<T>(key);
+	const cachedValid = cached ? zodSchema.safeParse(cached) : undefined;
+	if (cachedValid?.success) return cachedValid.data;
+
 	const messages: ChatMessage[] = [
 		{ role: 'system', content: system },
 		{ role: 'user', content: prompt }
 	];
-	const { json } = await activeProvider().generateStructured({ messages, schema, schemaName });
-	return json;
+	const { json, usage } = await provider.generateStructured({
+		messages,
+		schema: zodToJsonSchema(zodSchema),
+		schemaName
+	});
+	const parsed = zodSchema.parse(json);
+	await setCacheEntry(key, kind, provider.id, modelId, parsed, usage, GEAR_CACHE_TTL_HOURS);
+	return parsed;
 }
 
 /** Ask the LLM to fill in specs for a lens not in the catalog. Result is marked llm-augmented. */
 export async function augmentLens(make: string, model: string): Promise<Result<Lens, string>> {
 	try {
-		const json = await runStructured(
+		const p = await runCachedStructured(
+			'gearLens',
+			make,
+			model,
 			LENS_SYSTEM,
 			`Lens: ${make} ${model}. Return its specifications.`,
 			'lens_specs',
-			zodToJsonSchema(lensSpecSchema)
+			lensSpecSchema
 		);
-		const p = lensSpecSchema.parse(json);
 		const lens: Lens = {
 			id: uid('lens'),
 			make: p.make,
@@ -99,13 +129,15 @@ export async function augmentLens(make: string, model: string): Promise<Result<L
 /** Ask the LLM to fill in specs for a camera body not in the catalog. Result is marked llm-augmented. */
 export async function augmentBody(make: string, model: string): Promise<Result<CameraBody, string>> {
 	try {
-		const json = await runStructured(
+		const p = await runCachedStructured(
+			'gearBody',
+			make,
+			model,
 			BODY_SYSTEM,
 			`Camera body: ${make} ${model}. Return its specifications.`,
 			'body_specs',
-			zodToJsonSchema(bodySpecSchema)
+			bodySpecSchema
 		);
-		const p = bodySpecSchema.parse(json);
 		const body: CameraBody = {
 			id: uid('body'),
 			make: p.make,

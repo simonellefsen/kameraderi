@@ -16,6 +16,25 @@ export interface PhotoBlobRecord {
 	createdAt: number;
 }
 
+/** A cached, already-Zod-validated LLM response, keyed by a hash of its inputs. */
+export interface AiCacheEntry {
+	key: string; // sha256 hex of the full (base + variant) cache key
+	kind: 'task' | 'gearLens' | 'gearBody';
+	provider: string;
+	model: string;
+	response: unknown; // the validated schema output (not the raw provider payload)
+	usage?: { inputTokens?: number; outputTokens?: number };
+	createdAt: number;
+	expiresAt: number;
+}
+
+/** How many "give me something different" variants have been generated for a base key. */
+export interface AiCacheVariantRow {
+	baseKey: string;
+	count: number;
+	updatedAt: number;
+}
+
 export class IrisDB extends Dexie {
 	settings!: Table<SettingsRecord, string>;
 	bodies!: Table<CameraBody, string>;
@@ -26,6 +45,8 @@ export class IrisDB extends Dexie {
 	evaluations!: Table<Evaluation, string>;
 	sessions!: Table<CoachingSession, string>;
 	photos!: Table<PhotoBlobRecord, string>;
+	aiCache!: Table<AiCacheEntry, string>;
+	aiCacheVariants!: Table<AiCacheVariantRow, string>;
 
 	constructor() {
 		super('iris');
@@ -39,6 +60,10 @@ export class IrisDB extends Dexie {
 			evaluations: '&id, submissionId',
 			sessions: '&id, startedAt, taskId',
 			photos: '&key, createdAt'
+		});
+		this.version(2).stores({
+			aiCache: '&key, kind, expiresAt',
+			aiCacheVariants: '&baseKey, updatedAt'
 		});
 	}
 }

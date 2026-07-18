@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import { settings } from '$lib/stores/settings.svelte';
 	import { migrateCatalog, seedCatalogIfEmpty } from '$lib/gear/catalog';
+	import { sweepExpiredAiCache } from '$lib/cache/aiCache';
 	import { detectBrowserLocale, t } from '$lib/i18n';
 
 	let { children } = $props();
@@ -17,6 +18,8 @@
 			console.warn('Catalog seed/migrate failed', e);
 		}
 		await settings.load();
+		// Best-effort housekeeping: drop expired AI cache rows. Never blocks first paint.
+		sweepExpiredAiCache().catch((e) => console.warn('AI cache sweep failed', e));
 		// First run (no persisted record yet): adopt the browser's language so the
 		// app starts in the user's preferred language. Persisted users keep their choice.
 		if (!settings.persisted) {

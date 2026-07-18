@@ -12,6 +12,8 @@ export function defaultSettings(): Settings {
 		llmAugmentGear: true,
 		activeRig: { bodyId: 'body_canon_eos_r8', lensId: 'lens_canon_rf_50_1.8' },
 		locale: DEFAULT_LOCALE,
+		aiCacheEnabled: true,
+		aiCacheTtlHours: 24,
 		providers: Object.fromEntries(
 			PROVIDER_LIST.map((p) => [
 				p.key,

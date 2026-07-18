@@ -80,10 +80,13 @@
 			session.error = t('session.errorNoKey');
 			return;
 		}
+		// A prior task in this session means the user is explicitly asking for something
+		// different ("New task"), not the first pull — bump the cache's variant counter.
+		const forceNewVariant = session.task !== null;
 		session.reset();
 		selectedPlaceName = null;
 		session.phase = 'gathering';
-		const res = await generateTask(settings.current.activeRig!);
+		const res = await generateTask(settings.current.activeRig!, { forceNewVariant });
 		if (!res.ok) {
 			session.error = res.error;
 			session.phase = 'idle';
@@ -97,12 +100,15 @@
 	// Re-design the task around a nearby place the user tapped, reusing the gathered context.
 	async function focusOn(place: NearbyPlace) {
 		if (!settings.current.activeRig || !session.context || rerolling) return;
+		// Re-tapping the already-selected place means "give me another one for this spot".
+		const forceNewVariant = selectedPlaceName === place.name;
 		selectedPlaceName = place.name;
 		rerolling = true;
 		session.error = null;
 		const res = await generateTask(settings.current.activeRig, {
 			context: session.context,
-			focusPlace: place
+			focusPlace: place,
+			forceNewVariant
 		});
 		rerolling = false;
 		if (!res.ok) {

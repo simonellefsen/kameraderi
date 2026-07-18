@@ -20,4 +20,6 @@ export interface Settings {
 	llmAugmentGear: boolean; // allow the LLM to fill specs for unknown gear
 	activeRig: ActiveRig | null; // the body + lens selected for the next session
 	locale: LocaleId; // UI + LLM output language (new sessions/tasks use this)
+	aiCacheEnabled: boolean; // cache task/gear-spec LLM responses to save tokens
+	aiCacheTtlHours: number; // task-generation cache lifetime (gear specs cache longer, fixed)
 }

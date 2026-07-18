@@ -4,6 +4,7 @@
 	import { PROVIDER_LIST, PROVIDERS } from '$lib/llm/providers';
 	import { createProvider } from '$lib/llm/registry';
 	import { SUPPORTED_LOCALES, t } from '$lib/i18n';
+	import { aiCacheEntryCount, aiCacheStats, clearAiCache } from '$lib/cache/aiCache';
 	import type { ProviderKey, Settings } from '$lib/types/settings';
 	import type { ValidationResult } from '$lib/llm/provider';
 
@@ -17,6 +18,19 @@
 	let loadError = $state<string | null>(null);
 	const results = $state<Record<string, ValidationResult>>({});
 
+	let cacheEntries = $state(0);
+	let cacheHits = $state(0);
+	let cacheTokensSaved = $state(0);
+	let clearingCache = $state(false);
+	let cacheCleared = $state(false);
+
+	async function refreshCacheStats() {
+		cacheEntries = await aiCacheEntryCount();
+		const s = aiCacheStats();
+		cacheHits = s.hits;
+		cacheTokensSaved = s.tokensSaved;
+	}
+
 	onMount(async () => {
 		// Always resolve to a usable draft — never leave the page stuck on "Loading…".
 		try {
@@ -27,7 +41,20 @@
 			loadError = e instanceof Error ? e.message : String(e);
 			draft = clone(defaultSettings());
 		}
+		await refreshCacheStats();
 	});
+
+	async function clearCache() {
+		clearingCache = true;
+		cacheCleared = false;
+		try {
+			await clearAiCache();
+			await refreshCacheStats();
+			cacheCleared = true;
+		} finally {
+			clearingCache = false;
+		}
+	}
 
 	const activeKey = $derived(draft?.activeProvider ?? 'openrouter');
 
@@ -122,6 +149,40 @@
 			/>
 			{t('setup.augmentGear')}
 		</label>
+	</div>
+
+	<div class="card">
+		<h3 style="margin-top: 0;">{t('setup.aiCache')}</h3>
+		<p class="muted" style="font-size: 0.85rem;">{t('setup.aiCacheHint')}</p>
+		<label class="row" style="align-items: center;">
+			<input type="checkbox" bind:checked={draft.aiCacheEnabled} style="width: auto;" />
+			{t('setup.aiCacheEnabled')}
+		</label>
+		<label for="cachettl">{t('setup.aiCacheTtl')}</label>
+		<input
+			id="cachettl"
+			type="number"
+			min="1"
+			step="1"
+			bind:value={draft.aiCacheTtlHours}
+			disabled={!draft.aiCacheEnabled}
+		/>
+		<div class="row" style="margin-top: 10px; align-items: center;">
+			<span class="muted" style="font-size: 0.82rem;">
+				{t('setup.aiCacheStats', {
+					entries: cacheEntries,
+					hits: cacheHits,
+					tokens: cacheTokensSaved.toLocaleString()
+				})}
+			</span>
+			<div class="spacer"></div>
+			<button class="btn btn-ghost" onclick={clearCache} disabled={clearingCache}>
+				{t('setup.aiCacheClear')}
+			</button>
+		</div>
+		{#if cacheCleared}
+			<div class="note" style="margin-top: 8px;">{t('setup.aiCacheCleared')}</div>
+		{/if}
 	</div>
 
 	<button class="btn btn-primary btn-block" onclick={save} disabled={saving}>

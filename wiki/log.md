@@ -5,6 +5,32 @@ the top. Use absolute dates.
 
 ---
 
+## 2026-07-11 — AI response cache shipped (Roadmap Requirement 1)
+
+Started implementing the roadmap; picked the highest-value item first. See
+[concepts/ai-response-cache.md](concepts/ai-response-cache.md) and the
+[design decision](decisions/2026-07-11-ai-response-cache-design.md) for full rationale.
+
+- New Dexie tables `aiCache` + `aiCacheVariants` (schema v1→v2). Pure key derivation in
+  `cache/aiCacheKey.ts` (14 new unit tests), Dexie-backed store in `cache/aiCache.ts`.
+- Task generation ([taskGeneration.ts](../src/lib/pipelines/taskGeneration.ts)) and gear-spec
+  augmentation ([gear/augment.ts](../src/lib/gear/augment.ts), via `runCachedStructured`) both
+  check the cache before calling the provider and write validated results back.
+- **Variant counter** solves the "New task should feel new" problem: `session/+page.svelte` passes
+  `forceNewVariant: true` when there was already a task in this session (New task) or when
+  re-tapping the currently-selected Nearby place; a plain first-generation or retry reuses the last
+  variant for a free hit.
+- Settings gained an "AI response cache" card: enable toggle, editable TTL (default 24h), live
+  stats (entries/hits/est. tokens saved via a small localStorage counter), "Clear AI cache".
+  Expired rows are swept opportunistically on app load.
+- Added `.claude/launch.json` (`pnpm run dev`, port 5173) so the Browser-pane preview tool targets
+  this repo instead of reusing a stale server from an unrelated project.
+- Verified in-browser: Settings card renders, "Clear AI cache" round-trips through Dexie with no
+  console errors, `/session` idle state unaffected. 79 tests pass (was 65), check + build green.
+
+Not done: cost/token meter, offline queue, no-key fallback tasks, export/"free up space" — next in
+Phase 3 per [roadmap.md](roadmap.md).
+
 ## 2026-07-11 — Roadmap drafted
 
 Added [roadmap.md](roadmap.md) (linked from the index). Frames every future feature inside the

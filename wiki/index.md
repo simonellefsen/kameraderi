@@ -31,7 +31,7 @@ browser (IndexedDB via Dexie). The user brings their own LLM key (BYOK).
   and the themed feature backlog with a suggested sequencing.
 - **schema.md** — IndexedDB (Dexie) schema, the domain data models, and invariants.
 - **concepts/** — Core ideas and mental models (coaching loop, local-first PWA, gear capability
-  model, the LLM-maintained wiki itself).
+  model, the AI response cache, the LLM-maintained wiki itself).
 - **decisions/** — Architectural/tech decisions with rationale (the "design within these, do not
   revisit" constraints from the brief, written down).
 - **experiments/** — Ideas under test, prompt-tuning notes, model comparisons.

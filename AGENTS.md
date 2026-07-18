@@ -59,6 +59,10 @@ routes/       / · /gear · /session · /history · /settings  (+layout: ssr=fal
 - **EXIF before canvas.** Always parse EXIF from the raw `File` before any downscale/canvas op
   (canvas strips metadata).
 - **Stable string ids** via `uid(prefix)`; `createdAt` epoch-millis.
+- **New structured LLM calls should go through the AI response cache** unless there's a specific
+  reason not to (see [wiki/concepts/ai-response-cache.md](wiki/concepts/ai-response-cache.md)) —
+  it's the user's tokens. Reuse `getCacheEntry`/`setCacheEntry` (`src/lib/cache/aiCache.ts`) and a
+  key from `src/lib/cache/aiCacheKey.ts`; don't invent a parallel caching scheme.
 
 ## Non-negotiables
 

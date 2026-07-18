@@ -10,9 +10,10 @@ Source of truth: [src/lib/db/schema.ts](../src/lib/db/schema.ts) (the `IrisDB` c
 [src/lib/types/](../src/lib/types/) (the domain types). **This document is the contract** — keep
 the Dexie store definition, the TS types, and this page in sync.
 
-## Tables (Dexie v1)
+## Tables (Dexie v2)
 
 ```
+-- v1 --
 settings       &id                              (singleton, id = 'app')
 bodies         &id, mount, isPhone
 lenses         &id, mount
@@ -22,11 +23,16 @@ submissions    &id, taskId, createdAt
 evaluations    &id, submissionId
 sessions       &id, startedAt, taskId
 photos         &key, createdAt                  (raw Blob store)
+-- v2 --
+aiCache          &key, kind, expiresAt           (cached, Zod-validated LLM responses)
+aiCacheVariants  &baseKey, updatedAt             ("New task" variant counters)
 ```
 
 `&` marks the primary key; the remaining names are secondary indexes (FKs + `createdAt` for
 time-ordered history). The `photos` table holds `{ key, blob, createdAt }` records keyed by
-`submission.photoBlobKey`.
+`submission.photoBlobKey`. `aiCache`/`aiCacheVariants` back the
+[AI response cache](concepts/ai-response-cache.md) — see
+[decisions/2026-07-11-ai-response-cache-design.md](decisions/2026-07-11-ai-response-cache-design.md).
 
 > Schema migrations use Dexie's versioning: bump `this.version(n).stores({...})` in
 > [schema.ts](../src/lib/db/schema.ts) and add an `.upgrade()` if data needs transforming. Update

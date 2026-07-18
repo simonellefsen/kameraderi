@@ -116,6 +116,16 @@ export const en = {
 	'setup.saving': 'Saving…',
 	'setup.loadErrorSuffix': '— showing defaults.',
 
+	// ---- AI cache ----
+	'setup.aiCache': 'AI response cache',
+	'setup.aiCacheHint':
+		'Reuses a recent task or gear-spec response instead of calling the LLM again, to save tokens. "New task" always asks for something different.',
+	'setup.aiCacheEnabled': 'Cache AI responses',
+	'setup.aiCacheTtl': 'Task cache lifetime (hours)',
+	'setup.aiCacheStats': '{entries} cached · {hits} reused · ~{tokens} tokens saved',
+	'setup.aiCacheClear': 'Clear AI cache',
+	'setup.aiCacheCleared': 'Cache cleared.',
+
 	// ---- gear ----
 	'gear.title': '🎚️ Gear',
 	'gear.cameraBody': 'Camera body',
@@ -311,6 +321,16 @@ const da: Record<MessageKey, string> = {
 	'setup.save': 'Gem indstillinger',
 	'setup.saving': 'Gemmer…',
 	'setup.loadErrorSuffix': '— viser standardværdier.',
+
+	// ---- AI cache ----
+	'setup.aiCache': 'AI-cache',
+	'setup.aiCacheHint':
+		'Genbruger et nyligt opgave- eller udstyrsspec-svar i stedet for at spørge LLM’en igen, for at spare tokens. "Ny opgave" beder altid om noget andet.',
+	'setup.aiCacheEnabled': 'Cache AI-svar',
+	'setup.aiCacheTtl': 'Opgave-cache holdbarhed (timer)',
+	'setup.aiCacheStats': '{entries} cachet · {hits} genbrugt · ~{tokens} tokens sparet',
+	'setup.aiCacheClear': 'Ryd AI-cache',
+	'setup.aiCacheCleared': 'Cache ryddet.',
 
 	// ---- gear ----
 	'gear.title': '🎚️ Udstyr',

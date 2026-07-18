@@ -175,6 +175,15 @@ export const en = {
 	'setup.storageConfirm': 'Remove downscaled photo copies older than {days} days? History, feedback, and thumbnails will stay. This cannot be undone.',
 	'setup.storageFreed': 'Removed {count} photo copies and freed {size}.',
 	'setup.storageRefresh': 'Refresh storage',
+	'setup.backup': 'Backup & restore',
+	'setup.backupHint': 'Save your gear, sessions, feedback, thumbnails, and stored photo copies in a portable file. API keys are never included.',
+	'setup.backupExport': 'Export backup',
+	'setup.backupExporting': 'Preparing backup…',
+	'setup.backupImport': 'Restore backup',
+	'setup.backupImporting': 'Restoring…',
+	'setup.backupImportConfirm': 'Restore this backup and replace this device’s coaching library? Current API keys stay on this device. This cannot be undone.',
+	'setup.backupImported': 'Backup restored. Your API keys were retained; start a fresh session when ready.',
+	'setup.backupError': 'Backup failed: {msg}',
 
 	// ---- gear ----
 	'gear.title': '🎚️ Gear',
@@ -435,6 +444,15 @@ const da: Record<MessageKey, string> = {
 	'setup.storageConfirm': 'Fjern nedskalerede billedkopier ældre end {days} dage? Historik, feedback og miniaturer bevares. Handlingen kan ikke fortrydes.',
 	'setup.storageFreed': 'Fjernede {count} billedkopier og frigjorde {size}.',
 	'setup.storageRefresh': 'Opdatér lagerplads',
+	'setup.backup': 'Sikkerhedskopi og gendannelse',
+	'setup.backupHint': 'Gem dit udstyr, sessioner, feedback, miniaturer og lagrede billedkopier i en flytbar fil. API-nøgler kommer aldrig med.',
+	'setup.backupExport': 'Eksportér sikkerhedskopi',
+	'setup.backupExporting': 'Forbereder sikkerhedskopi…',
+	'setup.backupImport': 'Gendan sikkerhedskopi',
+	'setup.backupImporting': 'Gendanner…',
+	'setup.backupImportConfirm': 'Gendan denne sikkerhedskopi og erstat denne enheds fotoarkiv? De nuværende API-nøgler bliver på enheden. Handlingen kan ikke fortrydes.',
+	'setup.backupImported': 'Sikkerhedskopi gendannet. Dine API-nøgler er bevaret; start en ny session, når du er klar.',
+	'setup.backupError': 'Sikkerhedskopi mislykkedes: {msg}',
 
 	// ---- gear ----
 	'gear.title': '🎚️ Udstyr',

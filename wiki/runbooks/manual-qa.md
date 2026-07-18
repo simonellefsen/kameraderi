@@ -33,6 +33,11 @@ partitioning).
    switch to airplane mode before submitting a photo: the app saves a local pending critique rather
    than losing the submission. Restore connectivity with Kameraderi open; the critique should run
    automatically and appear in the session/history.
+11. **Backup & restore** — in Settings, export a backup and confirm the downloaded JSON has no API
+   key text. On another browser profile (or after creating a disposable local session), restore it;
+   confirm the explicit replacement warning appears, the gear/history/photo thumbnails return, and
+   the receiving device's API key is retained. Start a new session after restore rather than
+   relying on any previously open task.
 
 ## Platform-specific checks
 

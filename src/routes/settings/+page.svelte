@@ -13,6 +13,9 @@
 	import { isOverBudget } from '$lib/usage/usageMath';
 	import { freeSpaceOlderThan, type FreedPhotoStorage } from '$lib/db/photos';
 	import { formatStorageBytes, getStorageEstimate, type StorageEstimate } from '$lib/storage/estimate';
+	import { createBackup, parseBackup, restoreBackup } from '$lib/backup/archive';
+	import { migrateCatalog } from '$lib/gear/catalog';
+	import { session } from '$lib/stores/session.svelte';
 	import type { ProviderKey, Settings } from '$lib/types/settings';
 	import type { ValidationResult } from '$lib/llm/provider';
 
@@ -38,6 +41,10 @@
 	let storageDays = $state(90);
 	let freeingSpace = $state(false);
 	let freedStorage = $state<FreedPhotoStorage | null>(null);
+	let exportingBackup = $state(false);
+	let importingBackup = $state(false);
+	let backupMessage = $state<string | null>(null);
+	let backupInput = $state<HTMLInputElement>();
 
 	async function refreshCacheStats() {
 		cacheEntries = await aiCacheEntryCount();
@@ -68,6 +75,60 @@
 			await refreshStorage();
 		} finally {
 			freeingSpace = false;
+		}
+	}
+
+	function downloadBackup(text: string) {
+		const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+		const link = document.createElement('a');
+		link.href = url;
+		link.download = `kameraderi-backup-${new Date().toISOString().slice(0, 10)}.json`;
+		document.body.append(link);
+		link.click();
+		link.remove();
+		setTimeout(() => URL.revokeObjectURL(url), 0);
+	}
+
+	async function exportBackup() {
+		exportingBackup = true;
+		backupMessage = null;
+		try {
+			downloadBackup(JSON.stringify(await createBackup()));
+		} catch (e) {
+			backupMessage = t('setup.backupError', { msg: e instanceof Error ? e.message : String(e) });
+		} finally {
+			exportingBackup = false;
+		}
+	}
+
+	async function importBackup(event: Event) {
+		const file = (event.currentTarget as HTMLInputElement).files?.[0];
+		if (!file) return;
+		backupMessage = null;
+		try {
+			const parsed = parseBackup(await file.text());
+			if (!parsed.ok) {
+				backupMessage = t('setup.backupError', { msg: parsed.error });
+				return;
+			}
+			if (!window.confirm(t('setup.backupImportConfirm'))) return;
+			importingBackup = true;
+			const restored = await restoreBackup(parsed.value);
+			if (!restored.ok) {
+				backupMessage = t('setup.backupError', { msg: restored.error });
+				return;
+			}
+		await migrateCatalog();
+		await settings.reload();
+		draft = clone(settings.current);
+		session.reset();
+			backupMessage = t('setup.backupImported');
+			await Promise.all([refreshCacheStats(), refreshUsage(), refreshStorage()]);
+		} catch (e) {
+			backupMessage = t('setup.backupError', { msg: e instanceof Error ? e.message : String(e) });
+		} finally {
+			importingBackup = false;
+			if (backupInput) backupInput.value = '';
 		}
 	}
 
@@ -299,6 +360,29 @@
 					size: formatStorageBytes(freedStorage.bytes)
 				})}
 			</div>
+		{/if}
+	</div>
+
+	<div class="card">
+		<h3 style="margin-top: 0;">{t('setup.backup')}</h3>
+		<p class="muted" style="font-size: 0.85rem;">{t('setup.backupHint')}</p>
+		<input
+			bind:this={backupInput}
+			type="file"
+			accept="application/json,.json"
+			style="display: none;"
+			onchange={importBackup}
+		/>
+		<div class="row" style="margin-top: 10px; justify-content: flex-end;">
+			<button class="btn btn-ghost" onclick={exportBackup} disabled={exportingBackup || importingBackup}>
+				{exportingBackup ? t('setup.backupExporting') : t('setup.backupExport')}
+			</button>
+			<button class="btn btn-primary" onclick={() => backupInput?.click()} disabled={importingBackup || exportingBackup}>
+				{importingBackup ? t('setup.backupImporting') : t('setup.backupImport')}
+			</button>
+		</div>
+		{#if backupMessage}
+			<div class="note" style="margin-top: 8px;">{backupMessage}</div>
 		{/if}
 	</div>
 

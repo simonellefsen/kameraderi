@@ -65,6 +65,13 @@ class SettingsStore {
 		await db().settings.put(record);
 	}
 
+	/** Re-read a record changed outside this store (for example, a portable backup restore). */
+	async reload() {
+		this.loaded = false;
+		this.persisted = false;
+		await this.load();
+	}
+
 	/** Convenience: the config for the currently active provider. */
 	get active(): ProviderConfig {
 		return this.current.providers[this.current.activeProvider];

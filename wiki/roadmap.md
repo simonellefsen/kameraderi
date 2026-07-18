@@ -141,8 +141,9 @@ Grouped by area; roughly ordered by value-to-effort within each. Nothing here ne
 - **Second opinion** — optionally evaluate with two providers and compare (costs more; opt-in).
 
 ### F. Data, privacy & resilience
-- **Export / import everything** — JSON(+ZIP with blobs) backup; the only cross-device path without
-  a server.
+- ~~**Export / import everything** — a portable JSON backup with stored photo copies; the only
+  cross-device path without a server.~~ Done 2026-07-18; see
+  [portable-backup.md](concepts/portable-backup.md).
 - ~~**"Free up space"** — drop blobs older than N days, keep metadata + thumbnails.~~ Done
   2026-07-18; see [storage-recovery.md](concepts/storage-recovery.md).
 - **Storage dashboard** — show usage vs. quota and re-request `navigator.storage.persist()`.

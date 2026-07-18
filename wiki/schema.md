@@ -128,6 +128,10 @@ Two small things live in `localStorage`, separate from the IndexedDB tables abov
 - **RAW is rejected in Phase 1** (vision models don't accept RAW; in-browser RAW decode is
   impractical). exifr can still read metadata from many RAW bodies for later.
 - **Every Evaluation references a Submission; every Submission references a Task and a photo Blob.**
+- **Portable backup** serializes the coaching library and downscaled photo Blobs to a versioned JSON
+  file, but excludes API keys, caches, and usage meter rows. Restore replaces the included tables
+  atomically while retaining API keys already held by the receiving device; see
+  [portable-backup.md](concepts/portable-backup.md).
 
 ## iOS / quota notes
 - iOS gives ~1 GB origin quota, but IndexedDB may be evicted after 7 days of inactivity under

@@ -5,6 +5,18 @@ at the top. Use absolute dates.
 
 ---
 
+## 2026-07-18 — Portable backup and restore
+
+- Settings now exports a versioned, local JSON backup of the coaching library: gear, sessions,
+  tasks, submissions, evaluations, pending offline work, thumbnails, and the downscaled photo
+  copies. Restore replaces that library atomically only after confirmation.
+- API keys, AI caches, and token-meter events are deliberately not exported. Restoring retains any
+  API key already on the receiving device, clears the in-progress session, and migrates the
+  curated catalog afterward.
+- Added unit coverage proving that photo data is serialized while an API key is absent. The tradeoff
+  of the dependency-free base64 JSON format is documented in
+  [portable-backup.md](concepts/portable-backup.md).
+
 ## 2026-07-18 — Storage recovery controls
 
 - Settings now displays the browser-reported storage estimate when available and offers an explicit

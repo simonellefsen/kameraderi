@@ -143,6 +143,12 @@ button:disabled {
 	color: #0b1220;
 }
 
+.btn-danger {
+	background: transparent;
+	border: 1px solid color-mix(in srgb, var(--bad) 70%, var(--surface-2));
+	color: var(--bad);
+}
+
 .btn-block {
 	width: 100%;
 }

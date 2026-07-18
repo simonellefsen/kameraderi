@@ -143,8 +143,8 @@ Grouped by area; roughly ordered by value-to-effort within each. Nothing here ne
 ### F. Data, privacy & resilience
 - **Export / import everything** — JSON(+ZIP with blobs) backup; the only cross-device path without
   a server.
-- **"Free up space"** — drop blobs older than N days, keep metadata + thumbnails (from the brief;
-  now overdue given iOS eviction).
+- ~~**"Free up space"** — drop blobs older than N days, keep metadata + thumbnails.~~ Done
+  2026-07-18; see [storage-recovery.md](concepts/storage-recovery.md).
 - **Storage dashboard** — show usage vs. quota and re-request `navigator.storage.persist()`.
 - **Encrypt the API key at rest** — Web Crypto + an optional passcode, so a shared device doesn't
   leak the key.

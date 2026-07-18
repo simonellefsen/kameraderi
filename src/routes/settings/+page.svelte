@@ -11,6 +11,8 @@
 		type UsageTotals
 	} from '$lib/usage/usageMeter';
 	import { isOverBudget } from '$lib/usage/usageMath';
+	import { freeSpaceOlderThan, type FreedPhotoStorage } from '$lib/db/photos';
+	import { formatStorageBytes, getStorageEstimate, type StorageEstimate } from '$lib/storage/estimate';
 	import type { ProviderKey, Settings } from '$lib/types/settings';
 	import type { ValidationResult } from '$lib/llm/provider';
 
@@ -32,6 +34,10 @@
 	let todayTokens = $state<UsageTotals>({ calls: 0, inputTokens: 0, outputTokens: 0, totalTokens: 0 });
 	let monthlyTokens = $state<UsageTotals>({ calls: 0, inputTokens: 0, outputTokens: 0, totalTokens: 0 });
 	let refreshingUsage = $state(false);
+	let storage = $state<StorageEstimate>({});
+	let storageDays = $state(90);
+	let freeingSpace = $state(false);
+	let freedStorage = $state<FreedPhotoStorage | null>(null);
 
 	async function refreshCacheStats() {
 		cacheEntries = await aiCacheEntryCount();
@@ -49,6 +55,22 @@
 		}
 	}
 
+	async function refreshStorage() {
+		storage = await getStorageEstimate();
+	}
+
+	async function freeSpace() {
+		if (!window.confirm(t('setup.storageConfirm', { days: storageDays }))) return;
+		freeingSpace = true;
+		freedStorage = null;
+		try {
+			freedStorage = await freeSpaceOlderThan(storageDays);
+			await refreshStorage();
+		} finally {
+			freeingSpace = false;
+		}
+	}
+
 	onMount(async () => {
 		// Always resolve to a usable draft — never leave the page stuck on "Loading…".
 		try {
@@ -59,7 +81,7 @@
 			loadError = e instanceof Error ? e.message : String(e);
 			draft = clone(defaultSettings());
 		}
-		await Promise.all([refreshCacheStats(), refreshUsage()]);
+		await Promise.all([refreshCacheStats(), refreshUsage(), refreshStorage()]);
 	});
 
 	async function clearCache() {
@@ -243,6 +265,41 @@
 				{t('setup.usageRefresh')}
 			</button>
 		</div>
+	</div>
+
+	<div class="card">
+		<h3 style="margin-top: 0;">{t('setup.storage')}</h3>
+		<p class="muted" style="font-size: 0.85rem;">{t('setup.storageHint')}</p>
+		{#if storage.usage != null && storage.quota != null}
+			<p class="muted" style="font-size: 0.82rem;">
+				{t('setup.storageEstimate', {
+					used: formatStorageBytes(storage.usage),
+					quota: formatStorageBytes(storage.quota)
+				})}
+			</p>
+		{:else}
+			<p class="muted" style="font-size: 0.82rem;">{t('setup.storageUnavailable')}</p>
+		{/if}
+		<label for="storageage">{t('setup.storageAge')}</label>
+		<select id="storageage" bind:value={storageDays}>
+			<option value={30}>{t('setup.storage30Days')}</option>
+			<option value={90}>{t('setup.storage90Days')}</option>
+			<option value={180}>{t('setup.storage180Days')}</option>
+		</select>
+		<div class="row" style="margin-top: 10px; justify-content: flex-end;">
+			<button class="btn btn-ghost" onclick={refreshStorage}>{t('setup.storageRefresh')}</button>
+			<button class="btn btn-danger" onclick={freeSpace} disabled={freeingSpace}>
+				{t('setup.storageFree')}
+			</button>
+		</div>
+		{#if freedStorage}
+			<div class="note" style="margin-top: 8px;">
+				{t('setup.storageFreed', {
+					count: freedStorage.photoCount,
+					size: formatStorageBytes(freedStorage.bytes)
+				})}
+			</div>
+		{/if}
 	</div>
 
 	<button class="btn btn-primary btn-block" onclick={save} disabled={saving}>

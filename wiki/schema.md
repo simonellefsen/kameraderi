@@ -132,8 +132,9 @@ Two small things live in `localStorage`, separate from the IndexedDB tables abov
 ## iOS / quota notes
 - iOS gives ~1 GB origin quota, but IndexedDB may be evicted after 7 days of inactivity under
   storage pressure (the `navigator.storage.persist()` API is not honored on iOS).
-- Mitigations: store only downscaled copies; offer "export session" (JSON+ZIP) and "free up space"
-  (drop blobs older than N days while keeping metadata + thumbnails). Call
+- Mitigations: store only downscaled copies; offer "free up space" (drop blobs older than N days
+  while keeping metadata + thumbnails; see [storage-recovery.md](concepts/storage-recovery.md)) and
+  plan a portable JSON+ZIP backup. Call
   `navigator.storage.persist()` where honored (desktop/Android; harmless no-op on iOS).
 - An **installed iOS PWA runs in a separate WKWebView with its own storage partition** — data in
   Safari ≠ data in the installed app. Tell users to install once and always open the icon.

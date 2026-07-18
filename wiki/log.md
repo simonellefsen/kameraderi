@@ -5,6 +5,16 @@ at the top. Use absolute dates.
 
 ---
 
+## 2026-07-18 — Storage recovery controls
+
+- Settings now displays the browser-reported storage estimate when available and offers an explicit
+  **Free up space** control for downscaled photo Blobs older than 30, 90, or 180 days.
+- Cleanup requires confirmation, retains session/task/evaluation/EXIF metadata and thumbnails, and
+  protects any Blob referenced by a queued offline evaluation. It never runs automatically.
+- Added deletion-policy and storage-format unit coverage. See
+  [storage-recovery.md](concepts/storage-recovery.md) for the recovery boundary; versioned
+  export/import remains the next resilience item.
+
 ## 2026-07-18 — Local fallback practice briefs
 
 - Added a bundled local task path for users without an API key and for offline sessions. It uses
